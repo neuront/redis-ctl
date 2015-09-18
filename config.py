@@ -18,7 +18,7 @@ LOG_FORMAT = os.getenv('LOG_FORMAT', '%(levelname)s:%(asctime)s:%(message)s')
 
 DEBUG = int(os.getenv('DEBUG', 0))
 POLL_INTERVAL = int(os.getenv('POLL_INTERVAL', 10))
-PERMDIR = os.getenv('PERMDIR', tempfile.gettempdir())
+PERMDIR = os.getenv('ERU_PERMDIR', tempfile.gettempdir())
 NODE_MAX_MEM = int(os.getenv('NODE_MAX_MEM', 2048 * 1000 * 1000))
 NODES_EACH_THREAD = int(os.getenv('NODES_EACH_THREAD', 10))
 REDIS_CONNECT_TIMEOUT = int(os.getenv('REDIS_CONNECT_TIMEOUT', 5))
@@ -37,9 +37,16 @@ OPEN_FALCON = {
     'interval': int(os.getenv('OPEN_FALCON_ANTICIPATED_INTERVAL', 30)),
 }
 
+ERU = {
+    'URL': os.getenv('ERU_URL', ''),
+    'TIMEOUT': int(os.getenv('ERU_TIMEOUT', 5000)),
+    'GROUP': os.getenv('ERU_GROUP', ''),
+    'NETWORK': os.getenv('ERU_NETWORK', 'net'),
+}
+
 try:
     from override_config import *
 except ImportError:
     pass
 
-App = import_string(APP_CLASS)
+from app.override import App

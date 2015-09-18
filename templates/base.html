@@ -79,9 +79,7 @@ $(document).ready(function() {
                     * or just change the template below in the <li> tag
             #}
             <li id='nav-current-user'>
-                {% autoescape false %}
-                    {{ render_me() }}
-                {% endautoescape %}
+                <a class='nav-link' href='/user/me'><i class='fa fa-user'></i>{{ g.user.nickname|e }}</a>
             </li>
         {% endif %}
         </ul>

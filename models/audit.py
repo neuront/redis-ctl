@@ -3,6 +3,7 @@ from datetime import datetime
 from werkzeug.utils import cached_property
 
 from base import db, Base, DB_TEXT_TYPE
+from user import User
 
 EVENT_TYPE_CREATE = 0
 EVENT_TYPE_DELETE = 1
@@ -22,7 +23,7 @@ class NodeEvent(Base):
     creation = db.Column(db.DateTime, default=datetime.now, nullable=False,
                          index=True)
     args_json = db.Column(DB_TEXT_TYPE, nullable=False)
-    user_id = db.Column(db.Integer, index=True)
+    user_id = db.Column(db.ForeignKey(User.id), nullable=False)
 
     __table_args__ = (db.Index('address', 'host', 'port'),)
 

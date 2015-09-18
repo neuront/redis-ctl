@@ -51,9 +51,12 @@
     </td>
     <td>
         {{ widgets.stat_icon('redis', node.host, node.port) }}
+    {% if g.user %}
         {{ widgets.suppress_btn('redis', node.host, node.port, node.suppress_alert) }}
+
         {% if node.detail.slots_migrating %}
         <button class='btn btn-warning fix-migrating-btn' data-host='{{ node.host|e }}' data-port='{{ node.port }}' data-localize='cluster-fix-migrating'>Fix migrating</button>
         {% endif %}
+    {% endif %}
     </td>
 </tr>

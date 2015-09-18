@@ -1,0 +1,11 @@
+{% extends './base.html' %}
+{% block title %}未登入{% endblock %}
+{% block user_menu %}{% endblock %}
+
+{% block body %}
+<div style='text-align: center'>
+    <h1>未登入或权限不足</h1>
+    <p>此页面需要登入才能阅览 请从 <big><a href='{{ login_url()|e }}' target='_blank'>OpenID</a></big> 登入再刷新此页面</p>
+    <p>继续以游客身份浏览请点击这里<a href='/'>回到首页</a></p>
+</div>
+{% endblock %}

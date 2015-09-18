@@ -11,6 +11,7 @@ from sqlalchemy.exc import IntegrityError
 from bgtask.proc import TASK_MAP
 from base import db, Base, DB_TEXT_TYPE
 from cluster import Cluster
+from user import User
 
 TASK_TYPE_FIX_MIGRATE = 0
 TASK_TYPE_MIGRATE = 1
@@ -31,7 +32,8 @@ class ClusterTask(Base):
     task_type = db.Column(db.Integer, nullable=False)
     exec_error = db.Column(DB_TEXT_TYPE)
     completion = db.Column(db.DateTime, index=True)
-    user_id = db.Column(db.Integer, index=True)
+    user_id = db.Column(db.ForeignKey(User.id), nullable=False)
+    user = db.relationship(User, foreign_keys='ClusterTask.user_id')
 
     @cached_property
     def completed(self):

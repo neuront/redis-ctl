@@ -1,4 +1,4 @@
-from flask import render_template, Markup
+from flask import render_template, Markup, g
 
 
 def component(tp, **kwargs):
@@ -54,3 +54,10 @@ def f_strftime(dt, fmt='%Y-%m-%d %H:%M:%S'):
     if not dt:
         return ''
     return dt.strftime(fmt.encode('utf-8')).decode('utf-8')
+
+import cgi
+
+
+def f_multiline_content(x):
+    return '<br>'.join([cgi.escape(t.strip(), quote=True)
+                        for t in x.split('\n')])

@@ -15,7 +15,7 @@ from models.cluster import remove_empty_cluster
 
 def _launch(command, host_port_list):
     redistrib.command.start_cluster_on_multi(
-        {(a['host'], a['port']) for a in host_port_list})
+        {(a['host'], a['port']) for a in host_port_list}, max_slots=2048)
     return True
 
 
@@ -82,9 +82,11 @@ def _migrate_slots(command, src_host, src_port, dst_host, dst_port, slots,
                                         [slots[start]])
         start += 1
         if (datetime.now() - begin).seconds >= config.POLL_INTERVAL:
+            logging.info('Finished migrating from %s:%d', src_host, src_port)
             command.args['start'] = start
             command.save()
             commit_session()
+            logging.info('Committing migrated from %s:%d', src_host, src_port)
             return start == len(slots)
     return True
 

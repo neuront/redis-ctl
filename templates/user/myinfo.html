@@ -1,0 +1,37 @@
+{% extends './user/info.html' %}
+
+{% block head %}
+<style>
+ul {
+    list-style-type: none;
+}
+</style>
+{% endblock %}
+
+{% block groups_disp %}
+<h1>我能做什么</h1>
+<div style='margin-left: 20px'>
+    <h3>登入用户</h3>
+    <ul>
+        <li><a href='/user/settings'><i class='fa fa-user-md'></i> 个人设置</a></li>
+        <li><a href='/user/logout'><i class='fa fa-sign-out'></i> 登出</a></li>
+        <li><a href='/user/logoutall'><i class='fa fa-sign-out'></i> 登出并删除所有设备上的登入凭证</a></li>
+        <li><i class='fa fa-tasks'></i> 访问控制面板页</li>
+        <li><i class='fa fa-wrench'></i> 执行集群任务</li>
+    </ul>
+
+    {% if g.user.active %}
+    <h3>正式用户</h3>
+    <ul>
+        <li><i class='fa fa-user'></i> 查看其他用户信息 / <a href='/user/profile/{{ who.username }}'>以一般方式查看自己的信息</a></li>
+    </ul>
+    {% endif %}
+
+    {% if g.user.is_admin %}
+    <h3>管理员</h3>
+    <ul>
+        <li><a href='/user/set_groups'><i class='fa fa-users'></i> 用户管理</a></li>
+    </ul>
+    {% endif %}
+</div>
+{% endblock %}
