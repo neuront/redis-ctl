@@ -76,9 +76,11 @@ def _migrate_slots(command, src_host, src_port, dst_host, dst_port, slots,
                                         [slots[start]])
         start += 1
         if (datetime.now() - begin).seconds >= config.POLL_INTERVAL:
+            logging.info('Finished migrating from %s:%d', src_host, src_port)
             command.args['start'] = start
             command.save()
             db.session.commit()
+            logging.info('Committing migrated from %s:%d', src_host, src_port)
             return start == len(slots)
     return True
 

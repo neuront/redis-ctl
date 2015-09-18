@@ -3,6 +3,8 @@ import json
 import types
 import logging
 import functools
+import urllib
+import urlparse
 import flask
 import werkzeug.exceptions
 from werkzeug.utils import cached_property
@@ -13,6 +15,7 @@ from eruhttp import EruException
 import template
 import file_ipc
 import models.base
+import models.user
 
 app = flask.Flask('RedisControl')
 app.secret_key = os.urandom(24)
@@ -81,7 +84,37 @@ class Request(object):
             return {}
 
     def render(self, templ, **kwargs):
-        return flask.Response(template.render(templ, **kwargs))
+        return flask.Response(
+            template.render(templ, user=self.user,
+                            user_login_uri=self.login_url, **kwargs))
+
+    @cached_property
+    def user(self):
+        if 'user' in self.session:
+            return models.user.get_by_id(flask.session['user'])
+        u = models.user.get_by_auth_key(self.idkey)
+        if u is not None:
+            self.set_user(u)
+        return u
+
+    def set_user(self, user):
+        self.set_session('user', user.id)
+
+    def del_user(self):
+        self.set_session('user', None)
+
+    @cached_property
+    def idkey(self):
+        return flask.request.cookies.get('idkey', None)
+
+    @cached_property
+    def login_url(self):
+        return urlparse.urlunparse(urlparse.ParseResult(
+            'http', 'openids-web.intra.hunantv.com', '/oauth/login', None,
+            urllib.urlencode({
+                'return_to': self.request.host_url + 'user/login_from_openid/',
+                'days': '14',
+            }), None))
 
     def set_session(self, key, value):
         self.session[key] = value
@@ -158,9 +191,23 @@ def demand_login(f):
     @functools.wraps(f)
     def wrapped(request, *args, **kwargs):
         if request.user is None:
-            return werkzeug.exceptions.Unauthorized()
+            raise werkzeug.exceptions.Unauthorized()
         return f(request, *args, **kwargs)
     return wrapped
+
+
+def demand_user_group(priv):
+    privilege = getattr(models.user, 'PRIV_' + priv.upper())
+    def wrapper(target):
+        @functools.wraps(target)
+        def wrapped(request, *args, **kwargs):
+            if request.user is None:
+                raise werkzeug.exceptions.Unauthorized()
+            if privilege & request.user.priv_flags == 0:
+                raise werkzeug.exceptions.Forbidden()
+            return target(request, *args, **kwargs)
+        return wrapped
+    return wrapper
 
 
 def send_file(filename, mimetype=None):

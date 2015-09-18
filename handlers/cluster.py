@@ -17,6 +17,7 @@ from models.base import db
 
 
 @base.get('/clusterp/<int:cluster_id>')
+@base.demand_login
 def cluster_panel(request, cluster_id):
     c = models.cluster.get_by_id(cluster_id)
     if c is None or len(c.nodes) == 0:
@@ -54,6 +55,7 @@ def list_all_tasks(request, page):
 
 
 @base.get_async('/cluster/task/steps')
+@base.demand_login
 def cluster_get_task_steps(request):
     t = models.task.get_task_by_id(int(request.args['id']))
     if t is None:
@@ -71,6 +73,7 @@ def cluster_get_task_steps(request):
 
 
 @base.get_async('/cluster/get_masters')
+@base.demand_login
 def cluster_get_masters_info(request):
     c = models.cluster.get_by_id(request.args['id'])
     if c is None or len(c.nodes) == 0:
@@ -80,6 +83,7 @@ def cluster_get_masters_info(request):
 
 
 @base.get_async('/cluster/list')
+@base.demand_login
 def list_clusters(request):
     r = []
     for c in models.cluster.list_all():
@@ -94,11 +98,13 @@ def list_clusters(request):
 
 
 @base.post_async('/cluster/add')
+@base.demand_login
 def add_cluster(request):
     return str(models.cluster.create_cluster(request.form['descr']).id)
 
 
 @base.post_async('/cluster/launch')
+@base.demand_login
 def start_cluster(request):
     cluster_id = int(request.form['cluster_id'])
     try:
@@ -112,6 +118,7 @@ def start_cluster(request):
 
 
 @base.post_async('/cluster/set_info')
+@base.demand_login
 def set_cluster_info(request):
     c = models.cluster.get_by_id(int(request.form['cluster_id']))
     if c is None:
@@ -121,12 +128,14 @@ def set_cluster_info(request):
 
 
 @base.post_async('/cluster/delete_proxy')
+@base.demand_login
 def delete_proxy(request):
     models.proxy.del_by_host_port(request.form['host'],
                                   int(request.form['port']))
 
 
 @base.post_async('/cluster/register_proxy')
+@base.demand_login
 def register_proxy(request):
     c = models.cluster.get_by_id(int(request.form['cluster_id']))
     if c is None:
@@ -136,13 +145,14 @@ def register_proxy(request):
 
 
 @base.post_async('/cluster/recover_migrate')
+@base.demand_login
 def recover_migrate_status(request):
     c = models.cluster.get_by_id(int(request.form['cluster_id']))
     if c is None:
         raise ValueError('no such cluster')
     masters = redistrib.command.list_masters(
         c.nodes[0].host, c.nodes[0].port)[0]
-    task = models.task.ClusterTask(cluster_id=c.id,
+    task = models.task.ClusterTask(cluster_id=c.id, user_id=request.user.id,
                                    task_type=models.task.TASK_TYPE_FIX_MIGRATE)
     for node in masters:
         task.add_step('fix_migrate', host=node.host, port=node.port)
@@ -150,6 +160,7 @@ def recover_migrate_status(request):
 
 
 @base.post_async('/cluster/migrate_slots')
+@base.demand_login
 def migrate_slots(request):
     src_host = request.form['src_host']
     src_port = int(request.form['src_port'])
@@ -159,19 +170,21 @@ def migrate_slots(request):
 
     src = nm.get_by_host_port(src_host, src_port)
 
-    task = models.task.ClusterTask(cluster_id=src.assignee_id,
-                                   task_type=models.task.TASK_TYPE_MIGRATE)
+    task = models.task.ClusterTask(
+        cluster_id=src.assignee_id, user_id=request.user.id,
+        task_type=models.task.TASK_TYPE_MIGRATE)
     task.add_step('migrate', src_host=src.host, src_port=src.port,
                   dst_host=dst_host, dst_port=dst_port, slots=slots)
     db.session.add(task)
 
 
 @base.post_async('/cluster/join')
+@base.demand_login
 def join_cluster(request):
     c = models.cluster.get_by_id(int(request.form['cluster_id']))
     if c is None or len(c.nodes) == 0:
         raise ValueError('no such cluster')
-    task = models.task.ClusterTask(cluster_id=c.id,
+    task = models.task.ClusterTask(cluster_id=c.id, user_id=request.user.id,
                                    task_type=models.task.TASK_TYPE_JOIN)
     task.add_step('join', cluster_id=c.id, cluster_host=c.nodes[0].host,
                   cluster_port=c.nodes[0].port,
@@ -181,14 +194,16 @@ def join_cluster(request):
 
 
 @base.post_async('/cluster/quit')
+@base.demand_login
 def quit_cluster(request):
     n = nm.get_by_host_port(request.post_json['host'],
                             int(request.post_json['port']))
     if n is None:
         raise ValueError('no such node')
 
-    task = models.task.ClusterTask(cluster_id=n.assignee_id,
-                                   task_type=models.task.TASK_TYPE_QUIT)
+    task = models.task.ClusterTask(
+        cluster_id=n.assignee_id, user_id=request.user.id,
+        task_type=models.task.TASK_TYPE_QUIT)
     for migr in request.post_json.get('migratings', []):
         task.add_step('migrate', src_host=n.host, src_port=n.port,
                       dst_host=migr['host'], dst_port=migr['port'],
@@ -198,13 +213,15 @@ def quit_cluster(request):
 
 
 @base.post_async('/cluster/batch')
+@base.demand_login
 def batch_tasks(request):
     c = models.cluster.get_by_id(request.post_json['cluster_id'])
     if c is None or len(c.nodes) == 0:
         raise ValueError('no such cluster')
 
     task = models.task.ClusterTask(
-        cluster_id=c.id, task_type=models.task.TASK_TYPE_BATCH)
+        cluster_id=c.id, user_id=request.user.id,
+        task_type=models.task.TASK_TYPE_BATCH)
     for n in request.post_json.get('migrs', []):
         task.add_step(
             'migrate', src_host=n['src_host'], src_port=n['src_port'],
@@ -215,13 +232,15 @@ def batch_tasks(request):
 
 
 @base.post_async('/cluster/replicate')
+@base.demand_login
 def replicate(request):
     n = nm.get_by_host_port(
         request.form['master_host'], int(request.form['master_port']))
     if n is None or n.assignee_id is None:
         raise ValueError('unable to replicate')
-    task = models.task.ClusterTask(cluster_id=n.assignee_id,
-                                   task_type=models.task.TASK_TYPE_REPLICATE)
+    task = models.task.ClusterTask(
+        cluster_id=n.assignee_id, user_id=request.user.id,
+        task_type=models.task.TASK_TYPE_REPLICATE)
     task.add_step('replicate', cluster_id=n.assignee_id,
                   master_host=n.host, master_port=n.port,
                   slave_host=request.form['slave_host'],
@@ -230,6 +249,7 @@ def replicate(request):
 
 
 @base.post_async('/cluster/suppress_all_nodes_alert')
+@base.demand_login
 def suppress_all_nodes_alert(request):
     c = models.cluster.get_by_id(request.form['cluster_id'])
     if c is None:
@@ -352,6 +372,7 @@ def cluster_shutdown(request):
 
 
 @base.post_async('/cluster/set_balance_plan')
+@base.demand_login
 def cluster_set_balance_plan(request):
     cluster = models.cluster.get_by_id(int(request.form['cluster']))
     if cluster is None:
@@ -371,11 +392,16 @@ def cluster_set_balance_plan(request):
     for i, h in enumerate(slaves_host):
         plan.balance_plan['slaves'][i]['host'] = h
     plan.save()
+    logging.info('Change balance plan of cluster %d by %s, to %s',
+                 cluster.id, request.user.username, plan.balance_plan)
 
 
 @base.post_async('/cluster/del_balance_plan')
+@base.demand_login
 def cluster_del_balance_plan(request):
     cluster = models.cluster.get_by_id(int(request.form['cluster']))
     if cluster is None:
         raise ValueError('no such cluster')
     cluster.del_balance_plan()
+    logging.info('Delete balance plan of cluster %d by %s',
+                 cluster.id, request.user.username)

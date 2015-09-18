@@ -33,10 +33,12 @@ class TaskRunner(threading.Thread):
                     task.fail('Step fails')
                     db.session.commit()
                     return
+                logging.info('Finished step %d', step.id)
                 lock = task.acquired_lock()
                 lock.step = None
                 db.session.add(lock)
                 db.session.commit()
+                logging.info('Committing step %d', step.id)
                 task.check_completed()
             except (StandardError, SQLAlchemyError), e:
                 logging.exception(e)

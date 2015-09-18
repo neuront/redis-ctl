@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 import base
 import config
 import file_ipc
+import models.node_event
 import models.node
 import models.proxy
 import models.cluster
@@ -34,6 +35,7 @@ if eru_client is not None:
         } for r in eru_client.list_pod_hosts(pod) if r['is_alive']])
 
     @base.post_async('/nodes/create/eru_node')
+    @base.demand_login
     def create_eru_node(request):
         container_info = None
         try:
@@ -46,6 +48,10 @@ if eru_client is not None:
                 host=request.form.get('host'), port=port)
             models.node.create_eru_instance(container_info['address'], port,
                                             container_info['container_id'])
+            models.node_event.eru_event(
+                container_info['address'], port,
+                models.node_event.EVENT_TYPE_CREATE, request.user,
+                request.form)
             return base.json_result(container_info)
         except IntegrityError:
             if container_info is not None:
@@ -56,6 +62,7 @@ if eru_client is not None:
             raise
 
     @base.post_async('/nodes/create/eru_proxy')
+    @base.demand_login
     def create_eru_proxy(request):
         container_info = None
         try:
@@ -75,6 +82,10 @@ if eru_client is not None:
                 container_info['container_id'])
             _set_proxy_remote(container_info['address'], port,
                               cluster.nodes[0].host, cluster.nodes[0].port)
+            models.node_event.eru_event(
+                container_info['address'], port,
+                models.node_event.EVENT_TYPE_CREATE, request.user,
+                request.form)
             return base.json_result(container_info)
         except IntegrityError:
             if container_info is not None:
@@ -85,13 +96,19 @@ if eru_client is not None:
             raise
 
     @base.post_async('/nodes/delete/eru')
+    @base.demand_login
     def delete_eru_node(request):
         eru_container_id = request.form['id']
         if request.form['type'] == 'node':
+            n = models.node.get_eru_by_container_id(eru_container_id)
             models.node.delete_eru_instance(eru_container_id)
         else:
+            n = models.proxy.get_eru_by_container_id(eru_container_id)
             models.proxy.delete_eru_instance(eru_container_id)
         rm_containers([eru_container_id])
+
+        models.node_event.eru_event(
+            n.host, n.port, models.node_event.EVENT_TYPE_DELETE, request.user)
 
     @base.post_async('/nodes/revive/eru')
     def revive_eru_node(request):
@@ -105,6 +122,7 @@ if eru_client is not None:
 
 
 @base.get('/nodes/manage/eru/')
+@base.demand_login
 def nodes_manage_page_eru(request):
     pods = []
     if eru_client is not None:

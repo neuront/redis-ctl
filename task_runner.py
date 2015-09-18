@@ -12,10 +12,10 @@ from algalon_cli import AlgalonClient
 
 
 def run(interval, algalon_client, app):
-    from daemonutils.node_polling import NodeStatCollector
+    from daemonutils.cluster_task import TaskPoller
 
     daemons = [
-        NodeStatCollector(app, interval, algalon_client),
+        TaskPoller(app, interval),
     ]
     for d in daemons:
         d.start()

@@ -1,0 +1,20 @@
+{% extends './base.html' %}
+
+{% block title %}用户资料{% endblock %}
+
+{% block body %}
+<h1>基本信息</h1>
+<table class='table'>
+    <tr><td>用户名</td><td>{{ who.username }}</td></tr>
+    <tr><td>头像</td><td><img class='avatar' src='{{ who.avatar|e }}'></td></tr>
+    <tr><td>昵称</td><td>{{ who.nickname|e }}</td></tr>
+    <tr><td>信息</td><td>{{ who.description|multiline_content }}</td></tr>
+</table>
+
+{% block groups_disp %}
+{% if who == user %}
+    这是<a href='/user/me'>你自己</a>
+{% endif %}
+{% endblock %}
+
+{% endblock %}

@@ -3,6 +3,7 @@ from retrying import retry
 from eruhttp import EruClient, EruException
 
 import config
+import models.pod_network
 
 eru_client = None
 if config.ERU_URL is not None:
@@ -32,13 +33,14 @@ def lastest_version_sha(what):
 def deploy_with_network(what, pod, entrypoint, ncore=1, host=None, args=None):
     logging.info('Eru deploy %s to pod=%s entrypoint=%s cores=%d host=%s :%s:',
                  what, pod, entrypoint, ncore, host, args)
-    network = eru_client.get_network(config.ERU_NETWORK)
+    network = eru_client.get_network(models.pod_network.get_network(pod))
     version_sha = lastest_version_sha(what)
     r = eru_client.deploy_private(
         config.ERU_GROUP, pod, what, ncore, 1, version_sha,
         entrypoint, 'prod', [network['id']], host_name=host, args=args)
     try:
         task_id = r['tasks'][0]
+        logging.info('Task created: %s', task_id)
     except LookupError:
         raise ValueError('eru fail to create a task ' + str(r))
 

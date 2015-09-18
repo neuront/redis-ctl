@@ -1,0 +1,48 @@
+{% extends './base.html' %}
+
+{% block title %}节点事件记录{% endblock %}
+
+{% block body %}
+
+{% block pagination %}
+<nav>
+    <ul class='pager'>
+        {% if page != 0 %}
+        <li class='previous'><a href='/nodes/events'><span aria-hidden='true'>&laquo;</span> 首页</a></li>
+        <li class='previous'><a href='/nodes/events/{{ page - 1 }}'><span aria-hidden='true'>&larr;</span> 上一页</a></li>
+        {% endif %}
+        <li class='next'><a href='/nodes/events/{{ page + 1 }}'>下一页 <span aria-hidden='true'>&rarr;</span></a></li>
+    </ul>
+</nav>
+{% endblock %}
+
+<table class='table' style='text-align: center'>
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>地址</th>
+            <th>部署</th>
+            <th>类型</th>
+            {% set event_types = ['添加', '移除', '配置', '执行指令'] %}
+            <th>参数</th>
+            <th>时间</th>
+            <th>用户</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for e in events %}
+        <tr>
+            <td>{{ e.id }}</td>
+            <td>{{ e.host|e }}:{{ e.port }}</td>
+            <td>{{ e.event_domain|e if e.event_domain else '-' }}</td>
+            <td>{{ event_types[e.event_type] }}</td>
+            <td>{{ e.args_json|e }}</td>
+            <td>{{ e.creation|strftime }}</td>
+            <td>{{ e.user|render_user('simple') }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{{ self.pagination() }}
+{% endblock %}

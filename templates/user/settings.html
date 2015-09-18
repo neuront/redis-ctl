@@ -1,0 +1,44 @@
+{% extends './base.html' %}
+
+{% block title %}设置个人信息{% endblock %}
+
+{% block body %}
+<table class='table form-group'>
+    <tr>
+        <td>头像地址</td>
+        <td><input id='avatar' value='{{ user.avatar|e }}'><button class='btn'>刷新</button></td>
+        <td><img class='avatar' id='avatar_preview' src='{{ user.avatar|e }}'></td>
+    </tr>
+    <tr>
+        <td>个人简介</td>
+        <td><textarea id='description' class='form-control'>{{ user.description|e }}</textarea></td>
+    </tr>
+</table>
+<button class='btn btn-primary' id='submit'>提交</button><span id='error'></span>
+
+<script>
+function checkUri(id) {
+    var uri = $('#' + id).val();
+    if (uri.search('http') !== 0 && uri.search('://') === -1) {
+        uri = 'http://' + uri;
+    }
+    $('#' + id).val(uri);
+    return uri
+}
+
+$('#avatar').blur(function() {
+    $('#avatar_preview').attr('src', checkUri('avatar'));
+});
+
+$('#submit').click(function() {
+    var inputValues = ['avatar', 'description'].reduce(
+        function(obj, item) {
+            obj[item] = $('#' + item).val();
+            return obj;
+        }, {});
+    $.post('/user/change_attributes', inputValues, function() {
+        window.location = '/user/me';
+    });
+});
+</script>
+{% endblock %}

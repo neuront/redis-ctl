@@ -11,6 +11,7 @@ import base
 import models.node
 import models.proxy
 import models.task
+import models.node_event
 import stats
 from models.base import db
 
@@ -18,6 +19,7 @@ MAX_MEM_LIMIT = (64 * 1000 * 1000, config.NODE_MAX_MEM)
 
 
 @base.get('/nodep/<host>/<int:port>')
+@base.demand_login
 def node_panel(request, host, port):
     node = models.node.get_by_host_port(host, port)
     if node is None:
@@ -34,26 +36,42 @@ def node_panel(request, host, port):
         stats_enabled=stats.client is not None)
 
 
+@base.paged('/nodes/events')
+def node_events(request, page):
+    return request.render('node/events.html', page=page,
+                          events=models.node_event.list_events(page * 50, 50))
+
+
 @base.post_async('/nodes/add')
+@base.demand_login
 def add_node(request):
     models.node.create_instance(
         request.form['host'], int(request.form['port']))
+    models.node_event.raw_event(
+        request.form['host'], int(request.form['port']),
+        models.node_event.EVENT_TYPE_CREATE, request.user)
 
 
 @base.post_async('/nodes/del')
+@base.demand_login
 def del_node(request):
     models.node.delete_free_instance(
         request.form['host'], int(request.form['port']))
+    models.node_event.raw_event(
+        request.form['host'], int(request.form['port']),
+        models.node_event.EVENT_TYPE_DELETE, request.user)
 
 
 @base.post_async('/nodes/fixmigrating')
+@base.demand_login
 def fix_node_migrating(request):
     n = models.node.get_by_host_port(request.form['host'],
                                      int(request.form['port']))
     if n is None or n.assignee is None:
         raise ValueError('no such node in cluster')
-    task = models.task.ClusterTask(cluster_id=n.assignee.id,
-                                   task_type=models.task.TASK_TYPE_FIX_MIGRATE)
+    task = models.task.ClusterTask(
+        cluster_id=n.assignee.id, user_id=request.user.id,
+        task_type=models.task.TASK_TYPE_FIX_MIGRATE)
     task.add_step('fix_migrate', host=n.host, port=n.port)
     db.session.add(task)
 
@@ -98,10 +116,15 @@ def nodes_get_masters_info(request):
 
 
 @base.post_async('/exec_command')
+@base.demand_login
 def node_exec_command(request):
     t = Talker(request.form['host'], int(request.form['port']))
     try:
-        r = t.talk(*json.loads(request.form['cmd']))
+        args = json.loads(request.form['cmd'])
+        models.node_event.raw_event(
+            t.host, t.port, models.node_event.EVENT_TYPE_EXEC, request.user,
+            args)
+        r = t.talk(*args)
     except ValueError as e:
         r = None if e.message == 'No reply' else ('-ERROR: ' + e.message)
     except ReplyError as e:
@@ -112,6 +135,7 @@ def node_exec_command(request):
 
 
 @base.post_async('/nodes/set_max_mem')
+@base.demand_login
 def node_set_max_mem(request):
     max_mem = int(request.form['max_mem'])
     if not MAX_MEM_LIMIT[0] <= max_mem <= MAX_MEM_LIMIT[1]:
@@ -125,6 +149,9 @@ def node_set_max_mem(request):
         if 'ok' != m.lower():
             raise ValueError('CONFIG SET maxmemroy redis %s:%d returns %s' % (
                 host, port, m))
+        models.node_event.eru_event(
+            host, port, models.node_event.EVENT_TYPE_CONFIG, request.user,
+            {'max_mem': max_mem})
     except BaseException as exc:
         logging.exception(exc)
         raise

@@ -1,0 +1,55 @@
+{% extends './base.html' %}
+
+{% block title %}设置用户组{% endblock %}
+
+{% block body %}
+<table class='table'>
+    {% for u in users %}
+    <tr class='user-perm-line'>
+        <td><img src='{{ u.avatar|e }}'></td>
+        <td>{{ u.username }}</td>
+        <td>{{ u.nickname|e }}</td>
+        <td>
+            <button class='check-group check-group-info {{ 'check-group-checked' if u.active else '' }}' data-group='user'>
+                <span>普通用户</span>
+            </button>
+            <button class='check-group check-group-info {{ 'check-group-checked' if u.is_admin else '' }}' data-group='admin'>
+                <span>管理员</span>
+            </button>
+        </td>
+        <td>
+            <button class='btn btn-primary set_perm_action' data-username='{{ u.username_lower }}'>保存其权限</button>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<span id='logger'></span>
+
+<script>
+$('.check-group').enableLabelCheck();
+
+$('.set_perm_action').click(function() {
+    var username = $(this).data('username');
+    var row = $(this).parent().parent();
+    var groups = row.find('.check-group-checked').map(function(i, e) {
+        return $(this).data('group');
+    }).toArray().join(',');
+    $.ajax({
+        url: '/user/do_set_groups',
+        type: 'POST',
+        data: {
+            user: username,
+            groups: groups
+        },
+        success: function() {
+            $('#logger').append(username + '权限已经修改').append($('<br>'));
+        },
+        error: function(e) {
+            var r = e.responseJSON;
+            $('#logger').append(r.reason).append($('<br>'));
+        }
+    });
+});
+</script>
+{% endblock %}

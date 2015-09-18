@@ -9,6 +9,7 @@
             <th>创建时间</th>
             <th>执行状态</th>
             <th>详情</th>
+            <th>创建者</th>
         </tr>
     </thead>
     <tbody style='text-align: center'>
@@ -34,6 +35,9 @@
             </td>
             <td>
                 <button class='btn btn-success' data-toggle='modal' data-target='#taskDetail' data-taskid='{{ task.id }}'>查看详情</button>
+            </td>
+            <td>
+                {{ task.user|render_user('simple') }}
             </td>
         </tr>
     {% endfor %}

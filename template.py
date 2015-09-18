@@ -90,6 +90,17 @@ def f_render_proxy(proxy, level, **kwargs):
     return render('components/proxy/%s.html' % level, proxy=proxy, **kwargs)
 
 
+@_filter
+def f_render_user(user, level):
+    return render('components/user/' + level + '.html', user=user)
+
+
+@_filter
+def f_multiline_content(x):
+    return '<br>'.join([cgi.escape(t.strip(), quote=True)
+                        for t in x.split('\n')])
+
+
 def component(tp, **kwargs):
     return render('components/%s.html' % tp, **kwargs)
 

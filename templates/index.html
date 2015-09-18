@@ -86,11 +86,13 @@ $(function() {
     </thead>
     <tbody>
     {% for node in nodes %}
-      {{ node|render_node('row', stats_enabled=stats_enabled) }}
+      {{ node|render_node('row', stats_enabled=stats_enabled, user=user) }}
     {% endfor %}
     </tbody>
   </table>
 </div>
+
+{% if user %}
 <div class="login-screen" style="padding-left: 199px; padding-top: 30px;background-color: #ecf0f1;min-height: 200px;">
   <div class='row'>
     <div class="col-xs-3">
@@ -143,4 +145,6 @@ $('#add-nodes').click(function() {
     }($('#add-nodes-host').val(), portBegin, portEnd);
 });
 </script>
+{% endif %}
+
 {% endblock %}
