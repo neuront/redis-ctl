@@ -3,6 +3,7 @@
 {% block title %}节点控制面板{% endblock %}
 
 {% block head %}
+<script src='/static/js/eru_container.js'></script>
 <style>
 .table { text-align: center; }
 .status-table {
@@ -47,16 +48,20 @@
         {% endif %}
         </td>
     </tr>
-    {% if node.eru_deployed %}
+  {%- if node.eru_deployed %}
     <tr>
         <th>部署</th>
         <td><i class='fa fa-cube'></i> ERU 容器</td>
     </tr>
-
-    {% if node.eru_info %}
+    {%- if node.eru_info %}
     <tr>
         <td>ERU 容器 ID</td>
-        <td>{{ node.eru_container_id|e }}</td>
+        <td>
+            <span>{{ node.eru_container_id|e }}</span>
+          {%- if not node.eru_info.is_alive %}
+            <button class='btn btn-info btn-revive-container' data-cid='{{ node.eru_container_id|e }}'>复活此容器</button>
+          {%- endif %}
+        </td>
     </tr>
     <tr>
         <td>ERU 容器创建时间</td>
@@ -66,9 +71,8 @@
         <td>ERU 宿主机地址</td>
         <td>{{ node.eru_info.host|e }}</td>
     </tr>
-    {% endif %}
-
-    {% endif %}
+    {%- endif %}
+  {%- endif %}
     <tr>
         <th>统计</th>
         <td>
