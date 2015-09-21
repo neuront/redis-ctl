@@ -174,8 +174,8 @@ function requestEruNode(btn) {
     $(btn).attr('disabled', 'disabled');
     $('#node-error').hide();
     var port = parseInt($('#port-node').val() || 6379);
-    if (!(6300 <= port && port <= 6399)) {
-        return displayErrorLabel($(btn), $('#node-error'), '端口范围应该在 6300-6399 之间');
+    if (!(6000 <= port && port <= 7999)) {
+        return displayErrorLabel($(btn), $('#node-error'), '端口范围应该在 6000-7999 之间');
     }
     $.ajax({
         url: '/nodes/create/eru_node',
@@ -215,8 +215,8 @@ function requestEruProxy(btn) {
         return;
     }
     var port = parseInt($('#port-proxy').val() || 8889);
-    if (!(8800 <= port && port <= 8899)) {
-        return displayErrorLabel($(btn), $('#proxy-error'), '端口范围应该在 8800-8899 之间');
+    if (!(8000 <= port && port <= 9999)) {
+        return displayErrorLabel($(btn), $('#proxy-error'), '端口范围应该在 8000-9999 之间');
     }
 
     $(btn).attr('disabled', 'disabled');

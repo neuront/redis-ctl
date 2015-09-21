@@ -320,12 +320,15 @@ $('#shutdown-cluster').click(function() {
                 <a target='_blank' href='/stats/proxy?host={{ proxy.host|e }}&port={{ proxy.port }}' class='btn btn-info'>状态历史 <i class='fa fa-external-link'></i></a>
                 <button class='btn btn-info' data-toggle='modal' data-target='#commandConsole' data-host='{{ proxy.host|e }}' data-port='{{ proxy.port }}'>直接发送指令</button>
                 <button class='btn btn-sync-remotes btn-info' data-host='{{ proxy.host|e }}' data-port='{{ proxy.port }}'>同步槽位映射</button>
-                {% if proxy.eru_deployed %}
+              {%- if proxy.eru_deployed %}
                 <button class='btn btn-inverse toggle-next'>删除此代理并下线容器</button>
                 <button class='btn btn-danger btn-del-container' data-type='proxy' data-cid={{ proxy.eru_container_id|tojson }}>确定</button>
-                {% else %}
+                {%- if proxy.eru_info and not proxy.eru_info.is_alive %}
+                <button class='btn btn-info btn-revive-container' data-cid={{ proxy.eru_container_id|tojson }}>复活此容器</button>
+                {%- endif %}
+              {%- else %}
                 <button class='btn btn-danger delete-proxy-btn' data-host={{ proxy.host|tojson }} data-port='{{ proxy.port }}'>从监视面板移除</button>
-                {% endif %}
+              {%- endif %}
                 <button class='check-suppress-alert check-group check-group-danger {{ 'check-group-checked' if proxy.suppress_alert else '' }}' data-ntype='proxy' data-host={{ proxy.host|tojson }} data-port='{{ proxy.port|tojson }}'>
                   <span class='check-group-label'>关闭报警</span>
                 </button>

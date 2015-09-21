@@ -6,11 +6,11 @@ from sqlalchemy.exc import IntegrityError
 
 import base
 import config
-import file_ipc
 import models.node
 import models.proxy
 import models.cluster
-from eru_utils import (deploy_node, deploy_proxy, rm_containers, eru_client)
+from eru_utils import (deploy_node, deploy_proxy, rm_containers, eru_client,
+                       revive_container)
 
 
 if eru_client is not None:
@@ -26,7 +26,7 @@ if eru_client is not None:
         container_info = None
         try:
             port = int(request.form.get('port', 6379))
-            if not 6300 <= port <= 6399:
+            if not 6000 <= port <= 7999:
                 raise ValueError('invalid port')
             container_info = deploy_node(
                 request.form['pod'], request.form['aof'] == 'y',
@@ -59,7 +59,7 @@ if eru_client is not None:
             if cluster is None or len(cluster.nodes) == 0:
                 raise ValueError('no such cluster')
             port = int(request.form.get('port', 8889))
-            if not 8800 <= port <= 8899:
+            if not 8000 <= port <= 9999:
                 raise ValueError('invalid port')
             container_info = deploy_proxy(
                 request.form['pod'], int(request.form['threads']),
@@ -88,8 +88,11 @@ if eru_client is not None:
             models.node.delete_eru_instance(eru_container_id)
         else:
             models.proxy.delete_eru_instance(eru_container_id)
-        file_ipc.write_nodes_proxies_from_db()
         rm_containers([eru_container_id])
+
+    @base.post_async('/nodes/revive/eru')
+    def revive_eru_node(request):
+        revive_container(request.form['id'])
 
 
 @base.get('/nodes/manage/eru/')
