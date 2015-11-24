@@ -43,6 +43,11 @@ def _filter(f):
     return f
 
 
+def _global(f):
+    _env.globals[f.__name__[2:]] = f
+    return f
+
+
 @_filter
 def f_tojson(obj):
     def default(obj):
@@ -83,6 +88,37 @@ def f_render_cluster(cluster, level, **kwargs):
 @_filter
 def f_render_proxy(proxy, level, **kwargs):
     return render('components/proxy/%s.html' % level, proxy=proxy, **kwargs)
+
+
+def component(tp, **kwargs):
+    return render('components/%s.html' % tp, **kwargs)
+
+
+@_global
+def g_icon(icon, color=None):
+    return component('icon', icon=icon, color=color)
+
+
+@_global
+def g_input(size=2, offset=0, id=None, cls=None, value=None, placeholder=None,
+           readonly=False, data=None):
+    return component('input', size=size, offset=offset, id=id, cls=cls or [],
+                     value=value or '', placeholder=placeholder or '',
+                     readonly=readonly, data=data or {})
+
+
+@_global
+def g_button(text, size=2, offset=0, color='default', id=None, cls=None,
+             icon=None, data=None):
+    return component('button', text=text, size=size, offset=offset, id=id,
+                     color=color, cls=cls or [], icon=icon, data=data or {})
+
+
+@_global
+def g_checkbox(text, size=2, offset=0, color='default', id=None, cls=None,
+               data=None):
+    return component('checkbox', text=text, size=size, offset=offset,
+                     color=color, id=id, cls=cls or [], data=data or {})
 
 
 def render(filename, **kwargs):

@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError
 
 import base
 import config
+import file_ipc
 import models.node
 import models.proxy
 import models.cluster
@@ -103,7 +104,6 @@ if eru_client is not None:
                               p.cluster.nodes[0].port)
 
 
-
 @base.get('/nodes/manage/eru/')
 def nodes_manage_page_eru(request):
     pods = []
@@ -118,9 +118,11 @@ def nodes_manage_page_eru(request):
 
 @base.paged('/nodes/manage/eru/nodes')
 def nodes_manage_page_eru_nodes(request, page):
-    return request.render(
-        'node/manage_eru_nodes.html', page=page,
-        nodes=models.node.list_eru_nodes(page * 20, 20))
+    node_details = file_ipc.read_details()['nodes']
+    nodes = []
+    for n in models.node.list_eru_nodes(page * 20, 20):
+        n.detail = node_details.get('%s:%d' % (n.host, n.port))
+    return request.render('node/manage_eru_nodes.html', page=page, nodes=nodes)
 
 
 @base.paged('/nodes/manage/eru/proxies')

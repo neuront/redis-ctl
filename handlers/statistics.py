@@ -77,18 +77,3 @@ if stats.client is not None:
                 node, field, 'MAX', span, now, interval)
 
         return base.json_result(result)
-
-    @base.get('/stats/statistics')
-    def statistics(request):
-        return request.render('statistics.html')
-
-    @base.get_async('/stats/sequence')
-    def sequence(request):
-        m = []
-        now = int(time.time())
-        for c in proxy.list_ip():
-            node = '%s:%d' % (c[0], c[1])
-            result = stats.client.query_request(node, now)
-            if result:
-                m.append(result)
-        return base.json_result(m)

@@ -1,0 +1,9 @@
+{% extends 'components/grid-group.html' %}
+
+{% block content %}
+<input type='text' class='form-control {{ ' '.join(cls) }}'
+    {% if id %}id='{{ id }}'{% endif %}
+    {% if readonly %}readonly='readonly'{% endif %}
+    {% for k, v in data.iteritems() %}data-{{ k }}="{{ v }}"{% endfor %}
+    value='{{ value|e }}' placeholder='{{ placeholder|e }}'>
+{% endblock %}

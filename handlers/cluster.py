@@ -33,8 +33,7 @@ def cluster_panel(request, cluster_id):
 
     proxy_details = all_details['proxies']
     for p in c.proxies:
-        p.read_slave = proxy_details.get(
-            '%s:%d' % (p.host, p.port), {}).get('read_slave')
+        p.details = proxy_details.get('%s:%d' % (p.host, p.port), {})
     return request.render('cluster/panel.html', cluster=c, nodes=nodes,
                           eru_client=eru_utils.eru_client, plan_max_slaves=3)
 
@@ -190,11 +189,28 @@ def quit_cluster(request):
 
     task = models.task.ClusterTask(cluster_id=n.assignee_id,
                                    task_type=models.task.TASK_TYPE_QUIT)
-    for migr in request.post_json['migratings']:
+    for migr in request.post_json.get('migratings', []):
         task.add_step('migrate', src_host=n.host, src_port=n.port,
                       dst_host=migr['host'], dst_port=migr['port'],
                       slots=migr['slots'])
     task.add_step('quit', cluster_id=n.assignee_id, host=n.host, port=n.port)
+    db.session.add(task)
+
+
+@base.post_async('/cluster/batch')
+def batch_tasks(request):
+    c = models.cluster.get_by_id(request.post_json['cluster_id'])
+    if c is None or len(c.nodes) == 0:
+        raise ValueError('no such cluster')
+
+    task = models.task.ClusterTask(
+        cluster_id=c.id, task_type=models.task.TASK_TYPE_BATCH)
+    for n in request.post_json.get('migrs', []):
+        task.add_step(
+            'migrate', src_host=n['src_host'], src_port=n['src_port'],
+            dst_host=n['dst_host'], dst_port=n['dst_port'], slots=n['slots'])
+    for n in request.post_json.get('quits', []):
+        task.add_step('quit', cluster_id=c.id, host=n['host'], port=n['port'])
     db.session.add(task)
 
 

@@ -123,3 +123,7 @@ th {
 .migrating-only .node-stable {
     display: none;
 }
+
+.row button {
+    width: 100%;
+}

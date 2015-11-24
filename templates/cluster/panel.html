@@ -50,7 +50,6 @@
         <div style='margin: 1em'></div>
         <button class='btn btn-info' id='cluster-enable-all-nodes-aof' data-aof='yes'>打开所有节点的 AOF</button>
         <button class='btn btn-danger' id='cluster-disable-all-nodes-aof' data-aof='no'>关闭所有节点的 AOF</button>
-        <button class='btn btn-primary' data-toggle='modal' data-target='#clusterAutoDiscover'>集群自动发现</button>
 
       {% if cluster.nodes|length == 1 %}
         <div style='margin: 1em'></div>
@@ -183,14 +182,10 @@ $('#shutdown-cluster').click(function() {
       <tfoot>
         <tr>
           <td>      
-            <div class="row demo-row">
-              <div class="col-xs-4"></div>
-              <div class="col-xs-4">
-                <button class='btn btn-primary' data-toggle='modal' data-target='#clusterAutoDiscover'>集群自动发现</button>
-              </div>
-              <div class="col-xs-4">
-                <button class='btn btn-primary' data-toggle='modal' data-target='#exportNodes'>节点地址列表</button>
-              </div>
+            <div class="row">
+                {{ button('集群自动发现', 4, offset=1, data={'toggle': 'modal', 'target': '#clusterAutoDiscover'}) }}
+                {{ button('节点地址列表', 4, data={'toggle': 'modal', 'target': '#exportNodes'}) }}
+                {{ button('节点调整', 3, data={'toggle': 'modal', 'target': '#nodesAdjustment'}) }}
             </div>
           </td>
         </tr>
@@ -236,15 +231,15 @@ $('#shutdown-cluster').click(function() {
         }
 
         function memCell(n) {
-            if (!(n.mem && n.mem.used_memory)) {
+            if (!(n.used_memory)) {
                 return $('<td>').text('?');
             }
-            if (!n.mem.maxmemory) {
-                return $('<td>').text(n.mem.used_memory);
+            if (!n.maxmemory) {
+                return $('<td>').text(n.used_memory);
             }
-            var memRate = n.mem.used_memory / n.mem.maxmemory * 100;
+            var memRate = n.used_memory / n.maxmemory * 100;
             var memLabelClass = memRate < 70 ? 'label-success' : (memRate < 90 ? 'label-warning' : 'label-danger');
-            return $('<td>').text(n.mem.used_memory + ' / ' + n.mem.maxmemory + ' ').append($('<span>').addClass('label').addClass(memLabelClass).text(memRate.toFixed(2) + '%'));
+            return $('<td>').text(n.used_memory + ' / ' + n.maxmemory + ' ').append($('<span>').addClass('label').addClass(memLabelClass).text(memRate.toFixed(2) + '%'));
         }
 
         function makeBaseCells(n) {
@@ -291,10 +286,13 @@ $('#shutdown-cluster').click(function() {
             });
         }
     });
+    window.allMasters = allMasters;
 }();
 </script>
 
 {{ render_template('components/cluster/export-nodes.html') }}
+{{ render_template('components/cluster/nodes-adjustment.html', cluster_id=cluster.id) }}
+
 <div class="panel panel-primary">
   <div class="panel-heading panel-heading-hide-content" id='proxies'>代理设置</div>
   <table class='table' style='float: center; text-align:center;'>
@@ -309,11 +307,14 @@ $('#shutdown-cluster').click(function() {
         <tr id='proxy-{{ proxy.host|e }}-{{ proxy.port }}'>
             <td>
                 {{ proxy.host|e }}:{{ proxy.port }}
-                {% if proxy.read_slave %}
+                {% if proxy.details.read_slave %}
                 <span class='label label-info'>只读</span>
                 {% endif %}
                 {% if proxy.eru_deployed %}
                 <i class='fa fa-cube'></i>
+                {% endif %}
+                {% if not proxy.details.stat %}
+                    {{ icon('warning', 'danger') }}
                 {% endif %}
             </td>
             <td>
@@ -407,9 +408,18 @@ $('#new-proxy-btn').click(function() {
       {%- if pods|length == 0 %}
           Eru 没有可用的机房
       {%- else %}
+          {% set plan = cluster.balance_plan or {} %}
           集群自动扩容在集群节点内存容量使用超过 90% 时自动申请新节点并迁移数据.
+          <button id='balance-plan-check' class='check-group check-group-info {{ 'check-group-checked' if plan.pod else '' }}'>启用自动扩容</button>
+          <script>
+          $('#balance-plan-check').enableLabelCheck({
+              onClick: function(btn) {
+                  $('#balance-plan').toggle(btn.prop('checked'));
+              }
+          });
+          </script>
           {{ render_template('components/cluster/eru_auto_balance.html', pods=pods,
-                             cluster=cluster, plan_max_slaves=plan_max_slaves) }}
+                             cluster=cluster, plan_max_slaves=plan_max_slaves, plan=plan) }}
       {%- endif %}
   {% endif %}
   </div>

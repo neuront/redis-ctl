@@ -6,6 +6,7 @@
       <th>宿主地址</th>
       <th>创建时间</th>
       <th>地址</th>
+      <th>集群模式</th>
       <th>下线容器</th>
     </tr>
   </thead>
@@ -17,6 +18,7 @@
       <td>{{ n.eru_info.host|e }}</td>
       <td>{{ n.eru_info.created|e }}</td>
       <td><a href='/nodep/{{ n.host|e }}/{{ n.port }}'>{{ n.host|e }}:{{ n.port }}</a></td>
+      <td>{{ n.detail.cluster_enabled }}</td>
       <td>
         {% if n.assignee_id %}
         集群在役中

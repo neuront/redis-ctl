@@ -28,9 +28,9 @@ th { text-align: center; }
       </tr>
     </thead>
     <tbody>
-   {% for cluster in clusters if cluster.nodes %}
-      {{ cluster|render_cluster('row', stats_enabled=stats_enabled, odd_row=loop.index % 2) }}
-   {% endfor %}
+    {% for cluster in clusters if cluster.nodes %}
+        {{ cluster|render_cluster('row', stats_enabled=stats_enabled, odd_row=loop.index % 2) }}
+    {% endfor %}
     </tbody>
   </table>
 </div>

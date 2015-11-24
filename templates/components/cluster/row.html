@@ -2,7 +2,7 @@
 {% set row_cls = 'class="row-odd"' if odd_row else '' %}
 <tr id='cluster-{{ cluster.id }}' {{ row_cls }}>
     <td rowspan='{{ info_rows }}'><a href='/clusterp/{{ cluster.id }}'>{{ cluster.id }}</a></td>
-    <td rowspan='{{ info_rows }}'>{{ cluster.description|e }}</td>
+    <td rowspan='{{ info_rows }}'><a href='/clusterp/{{ cluster.id }}'>{{ cluster.description|e }}</a></td>
     <td rowspan='{{ info_rows }}'>{{ cluster.nodes|length }}</td>
 {% if cluster.proxies %}
     {% for proxy in cluster.proxies %}

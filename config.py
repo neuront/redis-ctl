@@ -8,7 +8,7 @@ MYSQL_HOST = os.getenv('MYSQL_HOST', 'localhost')
 MYSQL_PORT = int(os.getenv('MYSQL_PORT', '3306'))
 MYSQL_USERNAME = os.getenv('MYSQL_USERNAME', 'root')
 MYSQL_PASSWORD = os.getenv('MYSQL_PASSWORD', '')
-MYSQL_DATABASE = os.getenv('MYSQL_DATABASE', 'redis-ctl')
+MYSQL_DATABASE = os.getenv('MYSQL_DATABASE', 'redisctl')
 
 OPEN_FALCON = {
     'host_query': os.getenv('OPEN_FALCON_HOST_QUERY', ''),
