@@ -16,12 +16,7 @@ class App(RedisCtl):
             return render_template('errors/%s.html' % e.code), e.code
 
     def login_url(self):
-        return urlparse.urlunparse(urlparse.ParseResult(
-            'http', 'openids-web.intra.hunantv.com', '/oauth/login', None,
-            urllib.urlencode({
-                'return_to': request.host_url + 'user/login_from_openid/',
-                'days': '14',
-            }), None))
+        return flask.url_for('.login')
 
     def ext_blueprints(self):
         return [import_bp_string('user')]

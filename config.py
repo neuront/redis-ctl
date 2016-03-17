@@ -4,7 +4,14 @@ import tempfile
 from werkzeug.utils import import_string
 
 APP_CLASS = os.getenv('APP_CLASS', 'app.RedisCtl')
-SERVER_PORT = int(os.getenv('SERVER_PORT', 5000))
+
+OAUTH2_CLIENT_ID = os.getenv('OAUTH2_CLIENT_ID', '')
+OAUTH2_CLIENT_SECRET = os.getenv('OAUTH2_CLIENT_SECRET', '')
+OAUTH2_BASE_URL = os.getenv('OAUTH2_BASE_URL', 'http://sso.ricebook.net/oauth/api/')
+OAUTH2_AUTHORIZE_URL = os.getenv('OAUTH2_AUTHORIZE_URL', 'http://sso.ricebook.net/oauth/authorize')
+OAUTH2_ACCESS_TOKEN_URL = os.getenv('OAUTH2_ACCESS_TOKEN_URL', 'http://sso.ricebook.net/oauth/token')
+
+SERVER_PORT = int(os.getenv('SERVER_PORT', 8000))
 
 MYSQL_HOST = os.getenv('MYSQL_HOST', 'localhost')
 MYSQL_PORT = int(os.getenv('MYSQL_PORT', '3306'))

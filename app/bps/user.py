@@ -2,11 +2,10 @@
 
 import re
 import functools
-import logging
-import urllib
-import urllib2
-import json
 from flask import abort, request, g, render_template, session, redirect
+import flask
+import config
+from flask_oauthlib.client import OAuth
 
 from app.bpbase import Blueprint
 from app.utils import json_response
@@ -18,6 +17,17 @@ ATTRS_FIELDS = {'avatar', 'description'}
 COOKIE_AGE = 86400 * 14
 IDENT_PATTERN = re.compile(r'^\w{4,16}')
 
+oauth = OAuth(flask.current_app)
+remote = oauth.remote_app(
+    'sso',
+    consumer_key=config.OAUTH2_CLIENT_ID,
+    consumer_secret=config.OAUTH2_CLIENT_SECRET,
+    request_token_params={'scope': 'email'},
+    base_url=config.OAUTH2_BASE_URL,
+    request_token_url=None,
+    access_token_url=config.OAUTH2_ACCESS_TOKEN_URL,
+    authorize_url=config.OAUTH2_AUTHORIZE_URL,
+)
 
 def _logout():
     session['user'] = None
@@ -121,29 +131,45 @@ def user_set_groups():
     db.session.add(user)
 
 
-@bp.route('/login_from_openid/')
-def login_from_openid():
-    r = urllib2.urlopen('http://openids-web.intra.hunantv.com/oauth/profile/?'
-                        + urllib.urlencode({'token': request.args['token']}))
-    u = json.loads(r.read())
-    user = models.user.get_by_openid(u['uid'])
-    if user is None:
-        username = IDENT_PATTERN.findall(u['uid'].replace('.', ''))
-        if not username or not username[0]:
-            logging.error('Invalid OpenID UID, detail: %s', json.dumps(u))
-            return u'OpenID 返回了不合法的 UID, 请 RTX 联系 林喆', 400
-        user = models.user.User(username=username[0], openid=u['uid'],
-                                priv_flags=models.user.PRIV_USER,
-                                nickname=u['realname'])
-        user.save()
-        db.session.commit()
-    return _login_redirect(user)
+@remote.tokengetter
+def get_oauth_token():
+    return flask.session.get('remote_oauth')
+
+
+@bp.route('/authorized')
+def authorized():
+    #TODO why!!!!!
+    flask.session['sso_oauthredir'] = flask.url_for('.authorized', _external=True)
+    resp = remote.authorized_response()
+    if resp is None:
+        print request.args['error_reason'], request.args['error_description']
+        flask.abort(400)
+    flask.session['remote_oauth'] = (resp['access_token'], '')
+    return flask.redirect(flask.url_for('.login'))
+
+
+@bp.route('/user/login_from_sso')
+def login():
+    if 'remote_oauth' in flask.session:
+        resp = remote.get('me')
+        user_info = resp.data
+        user = models.user.get_by_openid(user_info['id'])
+        if not user:
+            admin = models.user.PRIV_USER if not int(user_info['privilege']) else models.user.PRIV_ADMIN
+            user = models.user.User(username=user_info['name'], openid=user_info['id'],
+                                    priv_flags=admin,
+                                    nickname=user_info['real_name'])
+            user.save()
+            db.session.commit()
+        return _login_redirect(user)
+    return remote.authorize(
+        callback=flask.url_for('.authorized', _external=True)
+    )
 
 
 # ============== #
 # debug shortcut #
 # ============== #
-import config
 
 if config.DEBUG:
     @bp.route('/request_login_as_admin')

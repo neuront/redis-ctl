@@ -3,7 +3,7 @@ entrypoints:
     web:
         cmd: "python main.py"
         ports:
-            - "5000/tcp"
+            - "8000/tcp"
     daemon:
         cmd: "python daemon.py"
     taskrunner:
