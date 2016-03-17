@@ -4,10 +4,11 @@ from models.base import db
 import models.node
 import models.task
 import models.audit
+import config
 
 
 def _deploy_node(pod, aof, host, app):
-    depl = app.container_client.deploy_redis(pod, aof, 'macvlan', host=host)
+    depl = app.container_client.deploy_redis(pod, aof, config.DEFAULT_NETMODE, host=host)
     cid = depl['container_id']
     h = depl['address']
     models.node.create_eru_instance(h, 6379, cid)
