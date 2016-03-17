@@ -6,6 +6,7 @@ from eruhttp import EruClient, EruException
 from app.utils import datetime_str_to_timestamp
 from containerize import Base, ContainerizeExceptionBase
 import models.pod_network
+import config
 
 
 def exception_adapt(f):
@@ -61,7 +62,7 @@ class DockerClient(Base):
 
     def lastest_image(self, what):
         try:
-            return self.client.list_app_versions(what)['versions'][0]['sha']
+            return self.client.list_app_versions(what)[0]['sha']
         except LookupError:
             raise ValueError('eru fail to give version SHA of ' + what)
 
@@ -70,13 +71,16 @@ class DockerClient(Base):
                image=None):
         logging.info('Deploy %s to pod=%s entry=%s cores=%d addr=%s:%d :%s:',
                      what, pod, entrypoint, ncore, host, port, args)
-        network = self.client.get_network(
-            models.pod_network.get_network(pod, self.network))
+        network = models.pod_network.get_network(pod, self.network)
         if not image:
             image = self.lastest_image(what)
         r = self.client.deploy_private(
-            self.group, pod, what, ncore, 1, image,
-            entrypoint, 'prod', [network['id']], host_name=host, args=args)
+            pod, what, ncore, 1, image,
+            entrypoint, 'prod', [network],
+            host_name=host, args=args,
+            image=config.IMAGES[what],
+            raw=True
+        )
         try:
             task_id = r['tasks'][0]
             logging.info('Task created: %s', task_id)

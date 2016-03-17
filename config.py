@@ -31,6 +31,7 @@ PERMDIR = os.getenv('ERU_PERMDIR', tempfile.gettempdir())
 NODE_MAX_MEM = int(os.getenv('NODE_MAX_MEM', 2048 * 1000 * 1000))
 NODES_EACH_THREAD = int(os.getenv('NODES_EACH_THREAD', 10))
 REDIS_CONNECT_TIMEOUT = int(os.getenv('REDIS_CONNECT_TIMEOUT', 5))
+
 MICRO_PLAN_MEM = int(os.getenv('MICRO_PLAN_MEM', 108 * 1000 * 1000))
 
 # ========================= #
@@ -51,6 +52,15 @@ ERU = {
     'TIMEOUT': int(os.getenv('ERU_TIMEOUT', 5000)),
     'GROUP': os.getenv('ERU_GROUP', ''),
     'NETWORK': os.getenv('ERU_NETWORK', 'net'),
+}
+
+ERU_URL = os.getenv('ERU_URL', None)
+ERU_GROUP = os.getenv('ERU_GROUP', 'group')
+ERU_NETWORK = os.getenv('ERU_NETWORK', '10.200.0.0')
+
+IMAGES = {
+    'redis': os.getenv('REDIS_IMAGE', 'hub.ricebook.net/service/redis:3.0.7'),
+    'cerberus': os.getenv('CERBERUS_IMAGE', 'hub.ricebook.net/service/cerberus:0.7.8'),
 }
 
 SKYEYE = {
