@@ -4,10 +4,14 @@ entrypoints:
         cmd: "python main.py"
         ports:
             - "8000/tcp"
+        permdir: true
     daemon:
         cmd: "python daemon.py"
+        permdir: true
     taskrunner:
         cmd: "python task_runner.py"
+        permdir: true
     releaselock:
         cmd: "python release_task_lock.py"
+        permdir: true
 build: "pip install -r requirements.txt"
