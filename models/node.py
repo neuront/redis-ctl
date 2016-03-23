@@ -4,10 +4,7 @@ from eruhttp import EruException
 
 from base import db, Base
 from cluster import Cluster
-
-STATUS_ONLINE = 0
-STATUS_MISSING = -1
-STATUS_BROKEN = -2
+import eru_utils
 
 
 class RedisNode(Base):
@@ -30,7 +27,6 @@ class RedisNode(Base):
 
     @cached_property
     def eru_info(self):
-        import eru_utils
         if eru_utils.eru_client is None or not self.eru_deployed:
             return None
         try:

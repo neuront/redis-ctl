@@ -12,8 +12,8 @@
     "cluster-proxies": "Proxies",
     "nodes-info": "Nodes Info",
     "opt-all-nodes": "All nodes",
-    "opt-error-only": "Nodes not reachable",
-    "opt-noalert-only": "Nodes with alert turned off",
+    "opt-error-only": "Nodes Unreachable",
+    "opt-noalert-only": "Nodes with alarm disabled",
     "opt-migrating-only": "Nodes with migrating slots",
 
     "node-addr": "Address",

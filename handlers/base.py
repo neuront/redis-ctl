@@ -13,10 +13,10 @@ from eruhttp import EruException
 import template
 import file_ipc
 import models.base
+from app.api import RedisCtlApp
+import config
 
-app = flask.Flask('RedisControl')
-app.secret_key = os.urandom(24)
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+app = RedisCtlApp(config)
 
 
 # http://stackoverflow.com/a/11163649
