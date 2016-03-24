@@ -46,8 +46,10 @@
                 {% endif %}
             </span>
             <button class='btn btn-inverse' data-toggle='modal' data-target='#nodeMemSetting' data-localize='setting'>设置</button>
-            {{ render_template('components/node/memory-setting.html', host=node.host, port=node.port,
-                               max_mem=detail.maxmemory, used_mem=detail.used_memory, mem_limit=max_mem_limit) }}
+            {% autoescape false %}
+                {{ render('components/node/memory-setting.html', host=node.host, port=node.port,
+                          max_mem=detail.maxmemory, used_mem=detail.used_memory, mem_limit=max_mem_limit) }}
+            {% endautoescape %}
         {% else %}
         <span data-localize='wait-poll'>等待轮询</span>
         {% endif %}
@@ -480,7 +482,9 @@ $('#quit-cluster-btn,#migrating-slots-btn').click(function() {
     {{ button('加入集群', size=2, id='join-cluster-btn', cls=['panel-btn'], data={'bind': 'join-cluster'}, lcl='join-cluster') }}
 </div>
 
-{{ render_template('components/node/autodiscover.html', host=node.host, port=node.port) }}
+{% autoescape false %}
+    {{ render('components/node/autodiscover.html', host=node.host, port=node.port) }}
+{% endautoescape %}
 
 <div class='panel-div' id='start-cluster'>
     <span data-localize='cluster-description'>集群描述</span>: <input id='start-cluster-descr'>
@@ -655,7 +659,9 @@ $(document).ready(function() {
     });
 });
 </script>
-{{ render_template('components/command_console.html') }}
+{% autoescape false %}
+    {{ render('components/command_console.html') }}
+{% endautoescape %}
 
 {% include 'components/info_console.html' %}
 {% endblock %}

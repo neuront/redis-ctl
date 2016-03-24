@@ -225,7 +225,7 @@ $('#shutdown-cluster').click(function() {
         function makeNoStatCells(n) {
             return [
                 $('<td>').append('-'),
-                $('<td>').append($('<a>').attr('href', ['/nodep', n.host, n.port].join('/')).text(n.host + ':' + n.port)),
+                $('<td>').append($('<a>').attr('href', ['/redis/panel', n.host, n.port].join('/')).text(n.host + ':' + n.port)),
                 $('<td>').attr('colspan', 4).text(_('尚未获取节点详细信息'))
             ];
         }
@@ -245,7 +245,7 @@ $('#shutdown-cluster').click(function() {
         function makeBaseCells(n) {
             return [
                 $('<td>').addClass('node-id').text(n.node_id),
-                $('<td>').addClass('node-addr').append($('<a>').attr('href', ['/nodep', n.host, n.port].join('/')).text(n.host + ':' + n.port)),
+                $('<td>').addClass('node-addr').append($('<a>').attr('href', ['/redis/panel', n.host, n.port].join('/')).text(n.host + ':' + n.port)),
                 memCell(n),
                 $('<td>').append(n.aof_enabled ? $('<span>').text('AOF').addClass('label').addClass('label-info') : '-')
             ];

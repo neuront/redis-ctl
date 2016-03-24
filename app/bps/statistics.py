@@ -57,8 +57,8 @@ def fetch_redis():
     return json_response(result)
 
 
-@bp.route('/stats/fetchproxy')
-def fetch_proxy(request):
+@bp.route('/fetchproxy')
+def fetch_proxy():
     host, port, limit, interval, span = _parse_args(request.args)
     now = int(time.time())
     node = '%s:%d' % (host, port)

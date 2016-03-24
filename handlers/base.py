@@ -13,10 +13,11 @@ from eruhttp import EruException
 import template
 import file_ipc
 import models.base
-from app.api import RedisCtlApp
+from app.api import RedisMuninApp
 import config
 
-app = RedisCtlApp(config)
+app = RedisMuninApp()
+app.apply(config)
 
 
 # http://stackoverflow.com/a/11163649

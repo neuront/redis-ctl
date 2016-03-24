@@ -8,22 +8,6 @@ from models.base import db
 from config import NODE_MAX_MEM
 
 
-@base.get('/nodep/<host>/<int:port>')
-def node_panel(request, host, port):
-    node = models.node.get_by_host_port(host, port)
-    if node is None:
-        return base.not_found()
-    detail = {}
-    try:
-        detail = file_ipc.read_details()['nodes'][
-            '%s:%d' % (node.host, node.port)]
-    except (IOError, ValueError, KeyError):
-        pass
-    return request.render(
-        'node/panel.html', node=node, detail=detail,
-        max_mem_limit=NODE_MAX_MEM, stats_enabled=stats.client is not None)
-
-
 @base.post_async('/nodes/add')
 def add_node(request):
     models.node.create_instance(

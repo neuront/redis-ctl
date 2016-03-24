@@ -151,7 +151,7 @@ $('#create-node-btn').click(function() {
                     ).append($('<td>').text(r.version.slice(0, 7))
                     ).append($('<td>').text(r.host)
                     ).append($('<td>').text(r.created)
-                    ).append($('<td>').append($('<a>').attr('href', '/nodep/' + r.address + '/' + port).text(r.address))
+                    ).append($('<td>').append($('<a>').attr('href', '/redis/panel/' + r.address + '/' + port).text(r.address))
                     ).append($('<td>')
                     ).append($('<td>').append(deleteButton(r.container_id, 'node'))
                     ));

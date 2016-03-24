@@ -39,27 +39,6 @@ def node_exec_command(request):
         t.close()
     return base.json_result(r)
 
-def _simple_cmd(host, port, *command):
-    status = 200
-    t = Talker(host, port)
-    try:
-        r = t.talk(*command)
-    except ReplyError as e:
-        r = '-' + e.message
-        status = 400
-    finally:
-        t.close()
-    return base.json_result(r, status)
-
-@base.get_async('/cmd/info')
-def node_exec_info(request):
-    return _simple_cmd(request.args['host'], int(request.args['port']), 'info')
-
-@base.get_async('/cmd/cluster_nodes')
-def node_exec_cluster_nodes(request):
-    return _simple_cmd(request.args['host'], int(request.args['port']),
-                       'cluster', 'nodes')
-
 MAX_MEM_LIMIT = (64 * 1000 * 1000, config.NODE_MAX_MEM)
 
 @base.post_async('/cmd/set_max_mem')

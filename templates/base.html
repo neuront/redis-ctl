@@ -14,8 +14,8 @@
 <script src='/static/js/common.js'></script>
 <script src='/static/js/application.js'></script>
 <script src='/static/js/components.js'></script>
-{% if lang %}
-<script src='/static/trans/{{ lang }}.js'></script>
+{% if lang or g.lang %}
+<script src='/static/trans/{{ lang or g.lang }}.js'></script>
 {% endif %}
 <script>
 function selectHash() {

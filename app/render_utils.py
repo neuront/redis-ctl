@@ -48,3 +48,9 @@ def g_checkbox(text, size=2, offset=0, color='default', checked=False,
     return component('checkbox', text=text, size=size, offset=offset,
                      color=color, checked=checked, id=id, cls=cls or [],
                      data=data or {}, lcl=lcl)
+
+
+def f_strftime(dt, fmt='%Y-%m-%d %H:%M:%S'):
+    if not dt:
+        return ''
+    return dt.strftime(fmt.encode('utf-8')).decode('utf-8')
