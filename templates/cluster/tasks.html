@@ -16,7 +16,7 @@
         <li><a href='/cluster/tasks/list/{{ cluster.id }}' data-localize='home'> 首页</a></li>
         <li class='previous'><a href='/cluster/tasks/list/{{ cluster.id }}/{{ page - 1 }}' data-localize='previous-page'> 上一页</a></li>
         {% endif %}
-        <li><a href='/clusterp/{{ cluster.id }}' data-localize='back-to-cluster-panel'>回到集群面板</a></li>
+        <li><a href='/cluster/panel/{{ cluster.id }}' data-localize='back-to-cluster-panel'>回到集群面板</a></li>
         <li class='next'><a href='/cluster/tasks/list/{{ cluster.id }}/{{ page + 1 }}' data-localize='next-page'>下一页 </a></li>
     </ul>
     </div>

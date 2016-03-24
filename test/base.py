@@ -27,7 +27,7 @@ import daemonutils.cluster_task
 import daemonutils.auto_balance
 import handlers.base
 import models.base
-import eru_utils
+from thirdparty import eru_utils
 
 app = handlers.base.app
 app.debug = True

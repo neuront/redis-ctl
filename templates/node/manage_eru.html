@@ -198,7 +198,7 @@ $('#create-proxy-btn').click(function () {
                     ).append($('<td>').text(r.version.slice(0, 7))
                     ).append($('<td>').text(r.host)
                     ).append($('<td>').text(r.created)
-                    ).append($('<td>').append($('<a>').attr('href', '/clusterp/' + clusterId).text(r.address + ':' + port))
+                    ).append($('<td>').append($('<a>').attr('href', '/cluster/panel/' + clusterId).text(r.address + ':' + port))
                     ).append($('<td>').append(deleteButton(r.container_id, 'proxy'))
                     ));
         },

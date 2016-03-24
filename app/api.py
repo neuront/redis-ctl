@@ -1,8 +1,8 @@
 import os
+import logging
 from flask import Flask, g, request, session, render_template
 from werkzeug.utils import import_string
 
-import stats
 import file_ipc
 import render_utils
 from models.base import init_db
@@ -12,12 +12,21 @@ blueprints = (
     'pollings',
     'redis_panel',
     'command',
+    'cluster',
 )
 
 
 def register_bp(app, module_name):
     import_name = '%s.bps.%s:bp' % (__package__, module_name)
     app.register_blueprint(import_string(import_name))
+
+
+def init_logging(config):
+    args = {'level': config.LOG_LEVEL}
+    if config.LOG_FILE:
+        args['filename'] = config.LOG_FILE
+    args['format'] = config.LOG_FORMAT
+    logging.basicConfig(**args)
 
 
 class RedisMuninApp(Flask):
@@ -34,14 +43,24 @@ class RedisMuninApp(Flask):
                 self.jinja_env.filters[u[2:]] = getattr(render_utils, u)
 
         self.config_node_max_mem = 2048 * 1000 * 1000
+        self.stats_client = None
+        self.alarm_client = None
 
-    def apply(self, config):
-        self.secret_key = os.urandom(24)
-        self.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+    def init_clients(self, config):
+        init_logging(config)
         self.config['SQLALCHEMY_DATABASE_URI'] = config.SQLALCHEMY_DATABASE_URI
         self.config_node_max_mem = config.NODE_MAX_MEM
+        self.debug = config.DEBUG == 1
 
         init_db(self)
+        self.stats_client = self.init_stats_client(config)
+        self.alarm_client = self.init_alarm_client(config)
+        logging.info('Stats enabled: %s', self.stats_enabled())
+        logging.info('Alarm enabled: %s', self.alarm_enabled())
+
+    def register_blueprints(self):
+        self.secret_key = os.urandom(24)
+        self.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
         for bp in blueprints:
             register_bp(self, bp)
@@ -75,14 +94,48 @@ class RedisMuninApp(Flask):
     def login_url(self):
         return ''
 
-    def stats_client(self):
-        return stats.client
-
-    def stats_enabled(self):
-        return self.stats_client() is not None
-
-    def stats_query(self, addr, field, aggrf, span, now, interval):
-        return stats.client.query(addr, field, aggrf, span, now, interval)
-
     def polling_result(self):
         return file_ipc.read_details()
+
+    def write_polling_details(self, redis_details, proxy_details):
+        file_ipc.write_details(redis_details, proxy_details)
+
+    def init_stats_client(self, config):
+        if config.OPEN_FALCON and config.OPEN_FALCON['db']:
+            from thirdparty.openfalcon import Client
+            return Client(**config.OPEN_FALCON)
+        return None
+
+    def stats_enabled(self):
+        return self.stats_client is not None
+
+    def stats_query(self, addr, field, aggrf, span, now, interval):
+        if self.stats_client is None:
+            return []
+        return self.do_stats_query(addr, field, aggrf, span, now, interval)
+
+    def stats_write(self, addr, points):
+        if self.stats_client is not None:
+            self.do_stats_write(addr, points)
+
+    def do_stats_query(self, addr, field, aggrf, span, now, interval):
+        return self.stats_client.query(addr, field, aggrf, span, now, interval)
+
+    def do_stats_write(self, addr, points):
+        self.stats_client.write_points(addr, points)
+
+    def init_alarm_client(self, config):
+        if config.ALGALON and config.ALGALON['dsn']:
+            from thirdparty.algalon_cli import AlgalonClient
+            return AlgalonClient(**config.ALGALON)
+        return None
+
+    def alarm_enabled(self):
+        return self.alarm_client is not None
+
+    def send_alarm(self, message, trace):
+        if self.alarm_client is not None:
+            self.do_send_alarm(message, trace)
+
+    def do_send_alarm(self, message, trace):
+        self.alarm_client.send_alarm(message, trace)

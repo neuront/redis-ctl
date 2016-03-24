@@ -21,7 +21,7 @@ class Proxy(Base):
 
     @cached_property
     def eru_info(self):
-        import eru_utils
+        from thirdparty import eru_utils
         if eru_utils.eru_client is None or not self.eru_deployed:
             return None
         return eru_utils.eru_client.get_container(self.eru_container_id)

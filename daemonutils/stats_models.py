@@ -2,11 +2,9 @@ import time
 import logging
 from retrying import retry
 from redistrib.clusternode import Talker, pack_command, ClusterNode
-from socket import error as SocketError
 from hiredis import ReplyError
 
-import stats
-from eru_utils import eru_client
+from thirdparty.eru_utils import eru_client
 from config import REDIS_CONNECT_TIMEOUT as CONNECT_TIMEOUT
 from models.base import db, Base
 
@@ -29,7 +27,7 @@ def _info_slots(t):
                 'slots': node.assigned_slots,
                 'slots_migrating': node.slots_migrating,
             }
-    except (ValueError, LookupError, ReplyError):
+    except (ValueError, LookupError, IOError, ReplyError):
         return {
             'node_id': None,
             'slave': False,
@@ -40,9 +38,7 @@ def _info_slots(t):
 
 def _info_detail(t):
     details = {}
-    now = time.time()
     info = t.talk_raw(CMD_INFO)
-    details['response_time'] = time.time() - now
     for line in info.split('\n'):
         if len(line) == 0 or line.startswith('#'):
             continue
@@ -62,8 +58,6 @@ class NodeBase(Base):
     addr = db.Column('addr', db.String(255), unique=True, nullable=False)
     poll_count = db.Column('poll_count', db.Integer, nullable=False)
     avail_count = db.Column('avail_count', db.Integer, nullable=False)
-    rsp_1ms = db.Column('rsp_1ms', db.Integer, nullable=False)
-    rsp_5ms = db.Column('rsp_5ms', db.Integer, nullable=False)
 
     def __init__(self, *args, **kwargs):
         Base.__init__(self, *args, **kwargs)
@@ -75,18 +69,13 @@ class NodeBase(Base):
         addr = '%s:%d' % (host, port)
         n = db.session.query(cls).filter(cls.addr == addr).first()
         if n is None:
-            n = cls(addr=addr, poll_count=0, avail_count=0, rsp_1ms=0,
-                    rsp_5ms=0)
+            n = cls(addr=addr, poll_count=0, avail_count=0)
             db.session.add(n)
             db.session.flush()
         n.details = {'host': host, 'port': port}
         return n
 
-    def set_available(self, response_time):
-        if response_time <= 0.001:
-            self.rsp_1ms += 1
-        elif response_time <= 0.005:
-            self.rsp_5ms += 1
+    def set_available(self):
         self.avail_count += 1
         self.poll_count += 1
         self.details['stat'] = True
@@ -108,15 +97,14 @@ class NodeBase(Base):
             return 0
         return float(self.avail_count) / self.poll_count
 
-    def send_to_influxdb(self, emit_func):
+    def stats_data(self):
         raise NotImplementedError()
 
     def collect_stats(self, emit_func, alarm_func):
         try:
             self._collect_stats(alarm_func)
-            if stats.client is not None:
-                self.send_to_influxdb(lambda p: emit_func(self.addr, p))
-        except (ReplyError, SocketError, StandardError), e:
+            emit_func(self.addr, self.stats_data())
+        except (IOError, ValueError, LookupError, ReplyError) as e:
             logging.error('Fail to retrieve info of %s:%d',
                           self.details['host'], self.details['port'])
             logging.exception(e)
@@ -142,8 +130,8 @@ class NodeBase(Base):
 class RedisNodeStatus(NodeBase):
     __tablename__ = 'redis_node_status'
 
-    def send_to_influxdb(self, emit_func):
-        emit_func({
+    def stats_data(self):
+        return {
             'used_memory': self['used_memory'],
             'used_memory_rss': self['used_memory_rss'],
             'connected_clients': self['connected_clients'],
@@ -154,13 +142,12 @@ class RedisNodeStatus(NodeBase):
             'keyspace_misses': self['keyspace_misses'],
             'used_cpu_sys': self['used_cpu_sys'],
             'used_cpu_user': self['used_cpu_user'],
-            'response_time': self['response_time'],
-        })
+        }
 
     @retry(stop_max_attempt_number=5, wait_fixed=500)
     def _collect_stats(self, alarm_func):
-        t = Talker(self.details['host'], self.details['port'], CONNECT_TIMEOUT)
-        try:
+        with Talker(self.details['host'], self.details['port'],
+                    CONNECT_TIMEOUT) as t:
             details = _info_detail(t)
             cluster_enabled = details.get('cluster_enabled') == '1'
             node_info = {'cluster_enabled': cluster_enabled}
@@ -189,13 +176,10 @@ class RedisNodeStatus(NodeBase):
                 'keyspace_misses': int(details['keyspace_misses']),
                 'aof_enabled': details['aof_enabled'] == '1',
             })
-            node_info['response_time'] = details['response_time']
             node_info['version'] = details['redis_version']
             node_info['stat'] = True
             self.details.update(node_info)
-            self.set_available(node_info['response_time'])
-        finally:
-            t.close()
+            self.set_available()
 
         try:
             self._check_capacity()
@@ -237,8 +221,8 @@ class RedisNodeStatus(NodeBase):
 class ProxyStatus(NodeBase):
     __tablename__ = 'proxy_status'
 
-    def send_to_influxdb(self, emit_func):
-        emit_func({
+    def stats_data(self):
+        return {
             'mem_buffer_alloc': self['mem_buffer_alloc'],
             'connected_clients': self['connected_clients'],
             'completed_commands': self['completed_commands'],
@@ -247,12 +231,12 @@ class ProxyStatus(NodeBase):
             'remote_cost': self['remote_cost'],
             'used_cpu_sys': self['used_cpu_sys'],
             'used_cpu_user': self['used_cpu_user'],
-        })
+        }
 
     @retry(stop_max_attempt_number=5, wait_fixed=500)
     def _collect_stats(self, alarm_func):
-        t = Talker(self.details['host'], self.details['port'], CONNECT_TIMEOUT)
-        try:
+        with Talker(self.details['host'], self.details['port'],
+                    CONNECT_TIMEOUT) as t:
             now = time.time()
             i = t.talk_raw(CMD_PROXY)
             lines = i.split('\n')
@@ -292,12 +276,10 @@ class ProxyStatus(NodeBase):
                 self.details['remote_cost'] = 0
 
             if cluster_ok:
-                self.set_available(self.details['command_elapse'])
+                self.set_available()
             else:
                 self.send_alarm(alarm_func)
                 self.set_unavailable()
-        finally:
-            t.close()
 
     def _send_alarm(self, alarm_func):
         alarm_func('Cerberus Failed %s:%d' % (

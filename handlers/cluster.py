@@ -5,38 +5,12 @@ from redistrib.clusternode import Talker
 from redistrib.exceptions import RedisStatusError
 
 import base
-import file_ipc
 import template
-import eru_utils
-import stats
 import models.cluster
 import models.task
 import models.proxy
 import models.node as nm
 from models.base import db
-
-
-@base.get('/clusterp/<int:cluster_id>')
-def cluster_panel(request, cluster_id):
-    c = models.cluster.get_by_id(cluster_id)
-    if c is None or len(c.nodes) == 0:
-        return base.not_found()
-    all_details = file_ipc.read_details()
-    node_details = all_details['nodes']
-    nodes = []
-    for n in c.nodes:
-        detail = node_details.get('%s:%d' % (n.host, n.port))
-        if detail is None:
-            nodes.append({'host': n.host, 'port': n.port, 'stat': False})
-        else:
-            nodes.append(detail)
-
-    proxy_details = all_details['proxies']
-    for p in c.proxies:
-        p.details = proxy_details.get('%s:%d' % (p.host, p.port), {})
-    return request.render('cluster/panel.html', cluster=c, nodes=nodes,
-                          eru_client=eru_utils.eru_client, plan_max_slaves=3,
-                          stats_enabled=stats.client is not None)
 
 
 @base.paged('/cluster/tasks/list/<int:cluster_id>')

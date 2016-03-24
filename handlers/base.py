@@ -1,4 +1,3 @@
-import os
 import json
 import types
 import logging
@@ -17,7 +16,8 @@ from app.api import RedisMuninApp
 import config
 
 app = RedisMuninApp()
-app.apply(config)
+app.init_clients(config)
+app.register_blueprints()
 
 
 # http://stackoverflow.com/a/11163649

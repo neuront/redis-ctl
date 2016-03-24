@@ -4,7 +4,7 @@ from eruhttp import EruException
 
 from base import db, Base
 from cluster import Cluster
-import eru_utils
+from thirdparty import eru_utils
 
 
 class RedisNode(Base):

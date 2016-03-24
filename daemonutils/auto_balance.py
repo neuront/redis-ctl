@@ -1,7 +1,7 @@
 import logging
 
 import file_ipc
-from eru_utils import deploy_node, rm_containers
+from thirdparty.eru_utils import deploy_node, rm_containers
 from models.base import db
 import models.node
 import models.task

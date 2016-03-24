@@ -10,8 +10,8 @@ import file_ipc
 import models.node
 import models.proxy
 import models.cluster
-from eru_utils import (deploy_node, deploy_proxy, rm_containers, eru_client,
-                       revive_container)
+from thirdparty.eru_utils import (deploy_node, deploy_proxy, rm_containers,
+                                  eru_client, revive_container)
 
 
 def _set_proxy_remote(proxy_addr, proxy_port, redis_host, redis_port):

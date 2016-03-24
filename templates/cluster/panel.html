@@ -59,7 +59,9 @@
     </tr>
   </table>
 </div>
-{{ render_template('components/node/autodiscover.html', host=cluster.nodes[0].host, port=cluster.nodes[0].port) }}
+{% autoescape false %}
+    {{ render('components/node/autodiscover.html', host=cluster.nodes[0].host, port=cluster.nodes[0].port) }}
+{% endautoescape %}
 
 <script>
 $('#cluster-set-descr').click(function() {
@@ -290,8 +292,10 @@ $('#shutdown-cluster').click(function() {
 }();
 </script>
 
-{{ render_template('components/cluster/export-nodes.html') }}
-{{ render_template('components/cluster/nodes-adjustment.html', cluster_id=cluster.id) }}
+{% autoescape false %}
+    {{ render('components/cluster/export-nodes.html') }}
+    {{ render('components/cluster/nodes-adjustment.html', cluster_id=cluster.id) }}
+{% endautoescape %}
 
 <div class="panel panel-primary">
   <div class="panel-heading panel-heading-hide-content" id='proxies' data-localize='proxies'>代理</div>
@@ -390,7 +394,9 @@ $('#new-proxy-btn').click(function() {
 });
 </script>
 
-{{ render_template('components/command_console.html') }}
+{% autoescape false %}
+    {{ render('components/command_console.html') }}
+{% endautoescape %}
 
 <div class="panel panel-primary">
   <div class="panel-heading panel-heading-hide-content" data-localize='set-auto-expansion'>设置自动扩容</div>
@@ -415,8 +421,10 @@ $('#new-proxy-btn').click(function() {
               }
           });
           </script>
-          {{ render_template('components/cluster/eru_auto_balance.html', pods=pods,
-                             cluster=cluster, plan_max_slaves=plan_max_slaves, plan=plan) }}
+          {% autoescape false %}
+              {{ render('components/cluster/eru_auto_balance.html', pods=pods,
+                        cluster=cluster, plan_max_slaves=plan_max_slaves, plan=plan) }}
+          {% endautoescape %}
       {%- endif %}
   {% endif %}
   </div>
@@ -427,7 +435,9 @@ $('#new-proxy-btn').click(function() {
     <span data-localize='background-task'>后台任务</span>
     <a href='/cluster/tasks/list/{{ cluster.id }}' style='color:white; float: right;' data-localize='more-task'>查看更多任务</a>
   </div>
-  {{ render_template('components/cluster/tasks.html', tasks=cluster.get_tasks()) }}
+  {% autoescape false %}
+    {{ render('components/cluster/tasks.html', tasks=cluster.get_tasks()) }}
+  {% endautoescape %}
 </div>
 
 {% include 'components/info_console.html' %}
