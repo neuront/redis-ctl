@@ -81,6 +81,9 @@ class RedisApp(Flask):
     def get_user_from_session(self, session):
         return None
 
+    def access_ctl_user_valid(self):
+        return True
+
     def language(self):
         try:
             return request.headers.get(

@@ -1,9 +1,15 @@
-from flask import render_template
+from flask import render_template, abort
 
 from app.bpbase import Blueprint
 import models.node
 
 bp = Blueprint('redis', __name__, url_prefix='/redis')
+
+
+@bp.before_request
+def access_control():
+    if not bp.app.access_ctl_user_valid():
+        abort(403)
 
 
 @bp.route('/panel/<host>/<int:port>')

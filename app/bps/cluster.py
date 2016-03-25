@@ -7,6 +7,12 @@ import models.cluster
 bp = Blueprint('cluster', __name__, url_prefix='/cluster')
 
 
+@bp.before_request
+def access_control():
+    if not bp.app.access_ctl_user_valid():
+        abort(403)
+
+
 @bp.route('/panel/<int:cluster_id>')
 def cluster_panel(cluster_id):
     c = models.cluster.get_by_id(cluster_id)
