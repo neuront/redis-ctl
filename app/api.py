@@ -33,7 +33,6 @@ class RedisApp(Flask):
     def __init__(self):
         Flask.__init__(self, 'RedisMunin', static_url_path='/static')
 
-        self.jinja_env.globals['login_url'] = self.login_url()
         self.jinja_env.globals['render'] = render_template
 
         for u in dir(render_utils):
@@ -77,6 +76,7 @@ class RedisApp(Flask):
             g.limit = request.args.get('limit', type=int, default=20)
             g.user = self.get_user_from_session(session)
             g.lang = self.language()
+            g.login_url = self.login_url()
 
     def get_user_from_session(self, session):
         return None
@@ -97,7 +97,7 @@ class RedisApp(Flask):
         return []
 
     def login_url(self):
-        return ''
+        return '#'
 
     def polling_result(self):
         return file_ipc.read_details()

@@ -3,7 +3,7 @@ import logging
 import tempfile
 from werkzeug.utils import import_string
 
-APP_CLASS = 'app.RedisApp'
+APP_CLASS = os.getenv('FLASK_APP', 'app.RedisApp')
 SERVER_PORT = int(os.getenv('SERVER_PORT', 5000))
 
 MYSQL_HOST = os.getenv('MYSQL_HOST', 'localhost')
