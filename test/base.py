@@ -8,6 +8,7 @@ import unittest
 import config
 try:
     from config import TEST_SQLALCHEMY_DATABASE_URI
+    config.SQLALCHEMY_DATABASE_URI = TEST_SQLALCHEMY_DATABASE_URI
 except ImportError:
     raise ValueError('TEST_SQLALCHEMY_DATABASE_URI should be'
                      ' specified in (override_)config for unittest')
@@ -30,9 +31,6 @@ import models.base
 from thirdparty import eru_utils
 
 app = handlers.base.app
-app.debug = True
-app.config['SQLALCHEMY_DATABASE_URI'] = TEST_SQLALCHEMY_DATABASE_URI
-models.base.init_db(app)
 
 unittest.TestCase.maxDiff = None
 logging.basicConfig(

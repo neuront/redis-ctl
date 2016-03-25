@@ -85,9 +85,11 @@ class RedisApp(Flask):
         return True
 
     def language(self):
+        lang = request.headers.get('Accept-Language')
+        if lang is None:
+            return None
         try:
-            return request.headers.get(
-                'Accept-Language').split(';')[0].split('-')[0]
+            return lang.split(';')[0].split('-')[0]
         except LookupError:
             return None
 
