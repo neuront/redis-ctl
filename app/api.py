@@ -29,7 +29,7 @@ def init_logging(config):
     logging.basicConfig(**args)
 
 
-class RedisMuninApp(Flask):
+class RedisApp(Flask):
     def __init__(self):
         Flask.__init__(self, 'RedisMunin', static_url_path='/static')
 

@@ -12,10 +12,9 @@ from eruhttp import EruException
 import template
 import file_ipc
 import models.base
-from app.api import RedisMuninApp
 import config
 
-app = RedisMuninApp()
+app = config.App()
 app.init_clients(config)
 app.register_blueprints()
 

@@ -5,7 +5,6 @@ gevent.monkey.patch_all()
 
 import config
 from daemonutils import stats_models as _
-from app.api import RedisMuninApp
 
 
 def run(interval, app):
@@ -23,7 +22,7 @@ def run(interval, app):
 
 
 def main():
-    app = RedisMuninApp()
+    app = config.App()
     app.init_clients(config)
     run(config.POLL_INTERVAL, app)
 
