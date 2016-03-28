@@ -15,9 +15,20 @@ REDIS_MAX_FIELDS = [
     'keyspace_misses', 'keyspace_hits',
 ]
 REDIS_AVG_FIELDS = ['used_memory', 'used_memory_rss', 'response_time']
+REDIS_FIELDS = {}
+for f in REDIS_MAX_FIELDS:
+    REDIS_FIELDS[f] = 'MAX'
+for f in REDIS_AVG_FIELDS:
+    REDIS_FIELDS[f] = 'AVERAGE'
+
 PROXY_MAX_FIELDS = ['connected_clients', 'mem_buffer_alloc',
                     'completed_commands', 'used_cpu_sys', 'used_cpu_user']
 PROXY_AVG_FIELDS = ['command_elapse', 'remote_cost']
+PROXY_FIELDS = {}
+for f in PROXY_MAX_FIELDS:
+    PROXY_FIELDS[f] = 'MAX'
+for f in PROXY_AVG_FIELDS:
+    PROXY_FIELDS[f] = 'AVERAGE'
 
 
 @bp.route('/redis')
@@ -45,29 +56,13 @@ def _parse_args(args):
 def fetch_redis():
     host, port, limit, interval, span = _parse_args(request.args)
     now = int(time.time())
-    node = '%s:%d' % (host, port)
-    result = {}
-
-    for field in REDIS_AVG_FIELDS:
-        result[field] = bp.app.stats_query(
-            node, field, 'AVERAGE', span, now, interval)
-    for field in REDIS_MAX_FIELDS:
-        result[field] = bp.app.stats_query(
-            node, field, 'MAX', span, now, interval)
-    return json_response(result)
+    return json_response(bp.app.stats_query(
+        '%s:%d' % (host, port), REDIS_FIELDS, span, now, interval))
 
 
 @bp.route('/fetchproxy')
 def fetch_proxy():
     host, port, limit, interval, span = _parse_args(request.args)
     now = int(time.time())
-    node = '%s:%d' % (host, port)
-    result = {}
-
-    for field in PROXY_MAX_FIELDS:
-        result[field] = bp.app.stats_query(
-            node, field, 'MAX', span, now, interval)
-    for field in PROXY_AVG_FIELDS:
-        result[field] = bp.app.stats_query(
-            node, field, 'AVERAGE', span, now, interval)
-    return json_response(result)
+    return json_response(bp.app.stats_query(
+        '%s:%d' % (host, port), PROXY_FIELDS, span, now, interval))

@@ -191,7 +191,7 @@ class HttpRequest(base.TestCase):
             self.assertEqual(1, len(nodes))
             comm.shutdown_cluster('127.0.0.1', 7100)
 
-    def test_suppress_alert(self):
+    def test_set_alarm(self):
         with self.app.test_client() as client:
             r = client.post('/nodes/add', data={
                 'host': '127.0.0.1',
@@ -207,7 +207,7 @@ class HttpRequest(base.TestCase):
             })
             self.assertEqual(200, r.status_code)
 
-            r = client.post('/set_alert_status/redis', data={
+            r = client.post('/set_alarm/redis', data={
                 'host': '127.0.0.1',
                 'port': '7100',
                 'suppress': '0',
@@ -262,14 +262,14 @@ class HttpRequest(base.TestCase):
             self.assertEqual(8889, n['port'])
             self.assertEqual(1, n['suppress_alert'])
 
-            r = client.post('/set_alert_status/redis', data={
+            r = client.post('/set_alarm/redis', data={
                 'host': '127.0.0.1',
                 'port': '7101',
                 'suppress': '0',
             })
             self.assertEqual(200, r.status_code)
 
-            r = client.post('/set_alert_status/redis', data={
+            r = client.post('/set_alarm/redis', data={
                 'host': '127.0.0.1',
                 'port': '7102',
                 'suppress': '0',

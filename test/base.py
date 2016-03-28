@@ -7,14 +7,14 @@ import unittest
 
 import config
 try:
-    from config import TEST_SQLALCHEMY_DATABASE_URI
-    config.SQLALCHEMY_DATABASE_URI = TEST_SQLALCHEMY_DATABASE_URI
+    config.SQLALCHEMY_DATABASE_URI = config.TEST_SQLALCHEMY_DATABASE_URI
+    config.LOG_FILE = os.path.join(tempfile.gettempdir(), 'redisctlpytest')
 except ImportError:
     raise ValueError('TEST_SQLALCHEMY_DATABASE_URI should be'
                      ' specified in (override_)config for unittest')
 
 
-config.PERMDIR = os.path.join(tempfile.gettempdir(), 'redistribpytestpermdir')
+config.PERMDIR = os.path.join(tempfile.gettempdir(), 'redisctlpytestpermdir')
 config.POLL_INTERVAL = 0
 config.ERU_URL = None
 config.ERU_NETWORK = 'net'
@@ -31,11 +31,7 @@ import models.base
 from thirdparty import eru_utils
 
 app = handlers.base.app
-
 unittest.TestCase.maxDiff = None
-logging.basicConfig(
-    level=logging.DEBUG, format='%(levelname)s:%(asctime)s:%(message)s',
-    filename=os.path.join(tempfile.gettempdir(), 'redistribpytest'))
 
 
 def reset_db():

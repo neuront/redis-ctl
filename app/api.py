@@ -10,6 +10,7 @@ from models.base import init_db
 blueprints = (
     'index',
     'pollings',
+    'alarm',
     'redis_panel',
     'command',
     'cluster',
@@ -51,6 +52,7 @@ class RedisApp(Flask):
         self.config_node_max_mem = config.NODE_MAX_MEM
         self.debug = config.DEBUG == 1
 
+        logging.info('Use database %s', self.config['SQLALCHEMY_DATABASE_URI'])
         init_db(self)
         self.stats_client = self.init_stats_client(config)
         self.alarm_client = self.init_alarm_client(config)
@@ -105,6 +107,9 @@ class RedisApp(Flask):
     def write_polling_details(self, redis_details, proxy_details):
         file_ipc.write_details(redis_details, proxy_details)
 
+    def write_polling_targets(self):
+        file_ipc.write_nodes_proxies_from_db()
+
     def init_stats_client(self, config):
         if config.OPEN_FALCON and config.OPEN_FALCON['db']:
             from thirdparty.openfalcon import Client
@@ -114,17 +119,17 @@ class RedisApp(Flask):
     def stats_enabled(self):
         return self.stats_client is not None
 
-    def stats_query(self, addr, field, aggrf, span, now, interval):
+    def stats_query(self, addr, fields, span, now, interval):
         if self.stats_client is None:
             return []
-        return self.do_stats_query(addr, field, aggrf, span, now, interval)
+        return self.do_stats_query(addr, fields, span, now, interval)
 
     def stats_write(self, addr, points):
         if self.stats_client is not None:
             self.do_stats_write(addr, points)
 
-    def do_stats_query(self, addr, field, aggrf, span, now, interval):
-        return self.stats_client.query(addr, field, aggrf, span, now, interval)
+    def do_stats_query(self, addr, fields, span, now, interval):
+        return self.stats_client.query(addr, fields, span, now, interval)
 
     def do_stats_write(self, addr, points):
         self.stats_client.write_points(addr, points)
