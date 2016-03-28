@@ -14,12 +14,23 @@ import handlers.base
 class HttpRequest(base.TestCase):
     def test_http(self):
         with self.app.test_client() as client:
-            r = client.post('/nodes/add', data={
+            self.assertEqual({'nodes': [], 'proxies': []},
+                             self.app.polling_targets())
+            r = client.post('/redis/add', data={
                 'host': '127.0.0.1',
                 'port': '7100',
                 'mem': '1048576',
             })
             self.assertReqStatus(200, r)
+            self.assertEqual({
+                'nodes': [{
+                    'host': '127.0.0.1',
+                    'port': 7100,
+                    'suppress_alert': 1,
+                }],
+                'proxies': [],
+            }, self.app.polling_targets())
+
             r = client.post('/cluster/add', data={
                 'descr': 'the-quick-brown-fox',
             })
@@ -52,7 +63,7 @@ class HttpRequest(base.TestCase):
                 'known': False,
             }, nodes[0])
 
-            r = client.post('nodes/add', data={
+            r = client.post('/redis/add', data={
                 'host': '127.0.0.1',
                 'port': '7100',
                 'mem': '1048576',
@@ -104,13 +115,13 @@ class HttpRequest(base.TestCase):
 
     def test_cluster_with_multiple_nodes(self):
         with self.app.test_client() as client:
-            r = client.post('/nodes/add', data={
+            r = client.post('/redis/add', data={
                 'host': '127.0.0.1',
                 'port': '7100',
                 'mem': '1048576',
             })
             self.assertReqStatus(200, r)
-            r = client.post('/nodes/add', data={
+            r = client.post('/redis/add', data={
                 'host': '127.0.0.1',
                 'port': '7101',
                 'mem': '1048576',
@@ -193,14 +204,14 @@ class HttpRequest(base.TestCase):
 
     def test_set_alarm(self):
         with self.app.test_client() as client:
-            r = client.post('/nodes/add', data={
+            r = client.post('/redis/add', data={
                 'host': '127.0.0.1',
                 'port': '7100',
                 'mem': '1048576',
             })
             self.assertEqual(200, r.status_code)
 
-            r = client.post('/nodes/add', data={
+            r = client.post('/redis/add', data={
                 'host': '127.0.0.1',
                 'port': '7101',
                 'mem': '1048576',

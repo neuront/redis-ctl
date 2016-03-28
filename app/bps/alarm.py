@@ -21,13 +21,13 @@ def _set_alarm_status(n):
     db.session.add(n)
 
 
-@bp.route_post_json('/redis')
+@bp.route_post_json('/redis', True)
 def set_redis_alarm():
     _set_alarm_status(models.node.get_by_host_port(
         request.form['host'], int(request.form['port'])))
 
 
-@bp.route_post_json('/proxy')
+@bp.route_post_json('/proxy', True)
 def set_proxy_alarm():
     _set_alarm_status(models.proxy.get_by_host_port(
         request.form['host'], int(request.form['port'])))

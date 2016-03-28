@@ -11,7 +11,7 @@ blueprints = (
     'index',
     'pollings',
     'alarm',
-    'redis_panel',
+    'redis',
     'cluster',
     'command',
     'task',
@@ -104,6 +104,9 @@ class RedisApp(Flask):
 
     def polling_result(self):
         return file_ipc.read_details()
+
+    def polling_targets(self):
+        return file_ipc.read_poll()
 
     def write_polling_details(self, redis_details, proxy_details):
         file_ipc.write_details(redis_details, proxy_details)

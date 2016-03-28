@@ -11,7 +11,7 @@
 
 <script>
 function addMe() {
-    $.post('/nodes/add', {
+    $.post('/redis/add', {
         host: {{ host|tojson }},
         port: {{ port|tojson }}
     }, function() {

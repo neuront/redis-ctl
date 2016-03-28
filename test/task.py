@@ -7,7 +7,7 @@ from models.task import ClusterTask
 class Task(base.TestCase):
     def test_execution(self):
         with self.app.test_client() as client:
-            r = client.post('/nodes/add', data={
+            r = client.post('/redis/add', data={
                 'host': '127.0.0.1',
                 'port': '7100',
                 'mem': '1048576',
@@ -54,7 +54,7 @@ class Task(base.TestCase):
 
     def test_execution_failed(self):
         with self.app.test_client() as client:
-            r = client.post('/nodes/add', data={
+            r = client.post('/redis/add', data={
                 'host': '127.0.0.1',
                 'port': '7100',
                 'mem': '1048576',

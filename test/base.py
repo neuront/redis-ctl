@@ -49,6 +49,7 @@ class TestCase(unittest.TestCase):
 
     def setUp(self):
         reset_db()
+        self.app.write_polling_targets()
 
     def replace_eru_client(self, client=None):
         if client is None:

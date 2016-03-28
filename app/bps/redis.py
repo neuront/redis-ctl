@@ -1,4 +1,4 @@
-from flask import render_template, abort
+from flask import render_template, abort, request
 
 from app.bpbase import Blueprint
 import models.node
@@ -28,3 +28,15 @@ def node_panel(host, port):
         'redis/panel.html', node=node, detail=detail,
         max_mem_limit=bp.app.config_node_max_mem,
         stats_enabled=bp.app.stats_enabled())
+
+
+@bp.route_post_json('/add', True)
+def add_redis():
+    models.node.create_instance(
+        request.form['host'], int(request.form['port']))
+
+
+@bp.route_post_json('/del', True)
+def del_redis():
+    models.node.delete_free_instance(
+        request.form['host'], int(request.form['port']))
