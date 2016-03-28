@@ -78,7 +78,7 @@ $('#cluster-set-descr').click(function() {
             btn.removeAttr('disabled');
         },
         error: function(e) {
-            btn.text(_('失败') + ': ' + e.responseText);
+            btn.text(_('failed') + ': ' + e.responseText);
         }
     });
 });
@@ -87,7 +87,7 @@ $('#cluster-fix-migrating').click(function() {
     var btn = $(this);
     btn.attr('disabled', 'disabled').text(_('请稍候'));
     $.ajax({
-        url: '/cluster/recover_migrate',
+        url: '/task/fix_cluster',
         type: 'POST',
         data: {
             cluster_id: {{ cluster.id|tojson }}
@@ -96,7 +96,7 @@ $('#cluster-fix-migrating').click(function() {
             window.location.reload();
         },
         error: function(e) {
-            btn.text(_('失败') + ': ' + e.responseText);
+            btn.text(_('failed') + ': ' + e.responseText);
         }
     });
 });
@@ -115,7 +115,7 @@ $('#cluster-enable-all-nodes-alert,#cluster-suppress-all-nodes-alert').click(fun
             window.location.reload();
         },
         error: function(e) {
-            btn.text(_('失败') + ': ' + e.responseText);
+            btn.text(_('failed') + ': ' + e.responseText);
         }
     });
 });
@@ -134,7 +134,7 @@ $('#cluster-enable-all-nodes-aof,#cluster-disable-all-nodes-aof').click(function
             window.location.reload();
         },
         error: function(e) {
-            btn.text(_('失败') + ': ' + e.responseText);
+            btn.text(_('failed') + ': ' + e.responseText);
         }
     });
 });
@@ -153,7 +153,7 @@ $('#shutdown-cluster').click(function() {
         },
         error: function(e) {
             if (!e.responseJSON) {
-                return btn.text(_('失败') + ':' + _('未知错误'));
+                return btn.text(_('failed') + ':' + _('未知错误'));
             }
             if (e.responseJSON.reason === 'not empty') {
                 return btn.text(_('此节点中还有数据') + ',' + _('请手动清理后重试'));
@@ -161,7 +161,7 @@ $('#shutdown-cluster').click(function() {
             if (e.responseJSON.reason === 'More than 1 nodes in cluster.') {
                 return btn.text(_('集群中有其他节点') + ',' + _('请使用自动发现刷新节点列表'));
             }
-            btn.text(_('失败') + ': ' + e.responseText);
+            btn.text(_('failed') + ': ' + e.responseText);
         }
     });
 });
@@ -388,7 +388,7 @@ $('#new-proxy-btn').click(function() {
             window.location.reload();
         },
         error: function(e) {
-            btn.text(_('失败') + ': ' + e.responseText);
+            btn.text(_('failed') + ': ' + e.responseText);
         }
     });
 });

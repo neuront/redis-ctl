@@ -21,13 +21,6 @@ def list_cluster_tasks(request, page, cluster_id):
     return request.render('cluster/tasks.html', cluster=c, page=page)
 
 
-@base.paged('/cluster/tasks/list_all')
-def list_all_tasks(request, page):
-    return request.render(
-        'cluster/tasks_all.html', page=page,
-        tasks=models.task.get_all_tasks(page * 50, 50))
-
-
 @base.get_async('/cluster/task/steps')
 def cluster_get_task_steps(request):
     t = models.task.get_task_by_id(int(request.args['id']))
@@ -100,20 +93,6 @@ def register_proxy(request):
         raise ValueError('no such cluster')
     models.proxy.get_or_create(request.form['host'], int(request.form['port']),
                                c.id)
-
-
-@base.post_async('/cluster/recover_migrate')
-def recover_migrate_status(request):
-    c = models.cluster.get_by_id(int(request.form['cluster_id']))
-    if c is None:
-        raise ValueError('no such cluster')
-    masters = redistrib.command.list_masters(
-        c.nodes[0].host, c.nodes[0].port)[0]
-    task = models.task.ClusterTask(cluster_id=c.id,
-                                   task_type=models.task.TASK_TYPE_FIX_MIGRATE)
-    for node in masters:
-        task.add_step('fix_migrate', host=node.host, port=node.port)
-    db.session.add(task)
 
 
 @base.post_async('/cluster/migrate_slots')

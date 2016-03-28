@@ -19,7 +19,7 @@ class Blueprint(flask.Blueprint):
     def route_post(self, url_pattern):
         return self.route(url_pattern, methods=['POST'])
 
-    def route_post_json(self, url_pattern):
+    def route_post_json(self, url_pattern, update_pollings=False):
         def wrapper(f):
             @self.route_post(url_pattern)
             @wraps(f)
@@ -27,7 +27,8 @@ class Blueprint(flask.Blueprint):
                 try:
                     r, code = f(*args, **kwargs), 200
                     models.base.db.session.commit()
-                    self.app.write_polling_targets()
+                    if update_pollings:
+                        self.app.write_polling_targets()
                 except KeyError, e:
                     r, code = {
                         'reason': 'missing argument',

@@ -12,8 +12,9 @@ blueprints = (
     'pollings',
     'alarm',
     'redis_panel',
-    'command',
     'cluster',
+    'command',
+    'task',
 )
 
 

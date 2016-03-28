@@ -319,7 +319,7 @@ $('#quit-cluster-confirm').click(function() {
             return window.location.reload();
         },
         error: function(r) {
-            btn.parent().text('失败: ' + r.responseText);
+            btn.parent().text(_('failed') + ': ' + r.responseText);
         }
     });
 });
@@ -359,7 +359,7 @@ $('#migrating-slots-confirm').click(function() {
                 return window.location.reload();
             },
             error: function(r) {
-                btn.parent().text('失败: ' + r.responseText);
+                btn.parent().text(_('failed') + ': ' + r.responseText);
             }
         });
         sliceStart += migrCount;
@@ -468,7 +468,7 @@ $('#quit-cluster-btn,#migrating-slots-btn').click(function() {
             $('.node-info input').blur(updateSlotsResult);
         },
         error: function(r) {
-            $('.loading-cluster-info').text('失败: ' + r.responseText);
+            $('.loading-cluster-info').text(_('failed') + ': ' + r.responseText);
         }
     });
 });
@@ -533,7 +533,7 @@ $('#start-cluster-confirm').click(function() {
                 window.location.reload();
             },
             error: function(r) {
-                btn.parent().text('失败: ' + r.responseText);
+                btn.parent().text(_('failed') + ': ' + r.responseText);
             }
         });
     });
@@ -578,14 +578,15 @@ $('#join-cluster-btn').click(function() {
                             }
                         },
                         error: function(r) {
-                            console.error('失败: ' + r.responseText);
+                            console.log(r);
+                            alert(_('failed') + ': ' + r.responseText);
                         }
                     });
                 }
             });
         },
         error: function(r) {
-            $('#loading-cluster-list').text('失败: ' + r.responseText);
+            $('#loading-cluster-list').text(_('failed') + ': ' + r.responseText);
         }
     });
 });
@@ -616,7 +617,7 @@ $('#join-cluster-confirm').click(function() {
             window.location.reload();
         },
         error: function(r) {
-            btn.parent().text('失败: ' + r.responseText);
+            btn.parent().text(_('failed') + ': ' + r.responseText);
         }
     });
 });
@@ -642,7 +643,7 @@ $('#replicate-confirm').click(function() {
             window.location.reload();
         },
         error: function(r) {
-            btn.parent().text('失败: ' + r.responseText);
+            btn.parent().text(_('failed') + ': ' + r.responseText);
         }
     });
 });
