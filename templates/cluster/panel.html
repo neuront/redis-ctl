@@ -433,7 +433,7 @@ $('#new-proxy-btn').click(function() {
 <div class="panel panel-primary">
   <div class="panel-heading panel-heading-hide-content">
     <span data-localize='background-task'>后台任务</span>
-    <a href='/cluster/tasks/list/{{ cluster.id }}' style='color:white; float: right;' data-localize='more-task'>查看更多任务</a>
+    <a href='/task/list_cluster/{{ cluster.id }}' style='color:white; float: right;' data-localize='more-task'>查看更多任务</a>
   </div>
   {% autoescape false %}
     {{ render('components/cluster/tasks.html', tasks=cluster.get_tasks()) }}

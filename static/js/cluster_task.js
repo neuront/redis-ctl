@@ -40,7 +40,7 @@ $(document).ready(function() {
         $('#taskDetailLoaderPlaceholder').show();
         $('#taskDetailContent').hide();
         $.ajax({
-            url: '/cluster/task/steps',
+            url: '/task/steps',
             type: 'GET',
             data: {id: taskId},
             success: function(r) {

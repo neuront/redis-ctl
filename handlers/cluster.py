@@ -13,31 +13,6 @@ import models.node as nm
 from models.base import db
 
 
-@base.paged('/cluster/tasks/list/<int:cluster_id>')
-def list_cluster_tasks(request, page, cluster_id):
-    c = models.cluster.get_by_id(cluster_id)
-    if c is None:
-        return base.not_found()
-    return request.render('cluster/tasks.html', cluster=c, page=page)
-
-
-@base.get_async('/cluster/task/steps')
-def cluster_get_task_steps(request):
-    t = models.task.get_task_by_id(int(request.args['id']))
-    if t is None:
-        return base.not_found()
-    return base.json_result([{
-        'id': step.id,
-        'command': step.command,
-        'args': step.args,
-        'status': 'completed' if step.completed else (
-            'running' if step.running else 'pending'),
-        'start_time': template.f_strftime(step.start_time),
-        'completion': template.f_strftime(step.completion),
-        'exec_error': step.exec_error,
-    } for step in t.all_steps])
-
-
 @base.get_async('/cluster/list')
 def list_clusters(request):
     r = []
