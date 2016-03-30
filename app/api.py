@@ -1,6 +1,6 @@
 import os
 import logging
-from flask import Flask, g, request, session, render_template
+from flask import Flask, g, request, render_template
 from werkzeug.utils import import_string
 
 import file_ipc
@@ -36,6 +36,7 @@ class RedisApp(Flask):
         Flask.__init__(self, 'RedisMunin', static_url_path='/static')
 
         self.jinja_env.globals['render'] = render_template
+        self.jinja_env.globals['render_user'] = self.render_user_by_id
 
         for u in dir(render_utils):
             if u.startswith('g_'):
@@ -77,12 +78,18 @@ class RedisApp(Flask):
             g.page = request.args.get('page', type=int, default=0)
             g.start = request.args.get('start', type=int, default=g.page * 20)
             g.limit = request.args.get('limit', type=int, default=20)
-            g.user = self.get_user_from_session(session)
+            g.user = self.get_user()
             g.lang = self.language()
             g.login_url = self.login_url()
 
-    def get_user_from_session(self, session):
+    def get_user(self):
         return None
+
+    def get_user_id(self):
+        return None
+
+    def render_user_by_id(self, user_id):
+        return '<span data-localize="nobody">-</span>'
 
     def access_ctl_user_valid(self):
         return True

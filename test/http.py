@@ -141,7 +141,7 @@ class HttpRequest(base.TestCase):
             })
             self.assertReqStatus(200, r)
 
-            r = client.post('/cluster/join', data={
+            r = client.post('/task/join', data={
                 'cluster_id': cluster_id,
                 'host': '127.0.0.1',
                 'port': 7101,
@@ -159,7 +159,7 @@ class HttpRequest(base.TestCase):
             self.assertEqual(2, len(nodes))
             self.assertEqual(16384, len(node_7100.assigned_slots))
 
-            r = client.post('/cluster/migrate_slots', data={
+            r = client.post('/task/migrate_slots', data={
                 'src_host': '127.0.0.1',
                 'src_port': 7100,
                 'dst_host': '127.0.0.1',
@@ -180,7 +180,7 @@ class HttpRequest(base.TestCase):
             self.assertEqual(2, len(nodes))
             self.assertEqual(16380, len(node_7100.assigned_slots))
 
-            r = client.post('/cluster/quit', data=json.dumps({
+            r = client.post('/task/quit', data=json.dumps({
                 'host': '127.0.0.1',
                 'port': 7101,
                 'migratings': [{

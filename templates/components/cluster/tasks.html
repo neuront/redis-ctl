@@ -8,6 +8,7 @@
             <th data-localize='task-creation'>创建时间</th>
             <th data-localize='task-status'>执行状态</th>
             <th data-localize='task-detail'>详情</th>
+            <th data-localize='task-creator'>Creator</th>
         </tr>
     </thead>
     <tbody style='text-align: center'>
@@ -33,6 +34,11 @@
             </td>
             <td>
                 <button class='btn btn-success' data-toggle='modal' data-target='#taskDetail' data-taskid='{{ task.id }}' data-localize='task-detail'>查看详情</button>
+            </td>
+            <td>
+                {% autoescape false %}
+                    {{ render_user(task.user_id) }}
+                {% endautoescape %}
             </td>
         </tr>
     {% endfor %}

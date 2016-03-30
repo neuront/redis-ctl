@@ -308,7 +308,7 @@ $('#quit-cluster-confirm').click(function() {
     });
 
     $.ajax({
-        url: '/cluster/quit',
+        url: '/task/quit',
         type: 'POST',
         data: JSON.stringify({
             host: {{ node.host|tojson }},
@@ -346,7 +346,7 @@ $('#migrating-slots-confirm').click(function() {
         }
 
         $.ajax({
-            url: '/cluster/migrate_slots',
+            url: '/task/migrate_slots',
             type: 'POST',
             data: {
                 src_host: {{ node.host|tojson }},
@@ -606,7 +606,7 @@ $('#join-cluster-confirm').click(function() {
     $('#join-cluster button').attr('disabled', 'disabled');
     btn.text('请稍候');
     $.ajax({
-        url: '/cluster/join',
+        url: '/task/join',
         type: 'POST',
         data: {
             host: {{ node.host|tojson }},
@@ -631,7 +631,7 @@ $('#replicate-confirm').click(function() {
     var btn = $(this);
     btn.text('请稍候');
     $.ajax({
-        url: '/cluster/replicate',
+        url: '/task/replicate',
         type: 'POST',
         data: {
             master_host: opt.host,

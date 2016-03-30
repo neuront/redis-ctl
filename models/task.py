@@ -30,6 +30,7 @@ class ClusterTask(Base):
     task_type = db.Column(db.Integer, nullable=False)
     exec_error = db.Column(DB_TEXT_TYPE)
     completion = db.Column(db.DateTime, index=True)
+    user_id = db.Column(db.Integer, index=True)
 
     @cached_property
     def completed(self):

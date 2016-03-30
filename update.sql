@@ -13,5 +13,8 @@ ALTER TABLE `proxy_status` MODIFY `addr` VARCHAR(255);
 
 -- 2016-04 0.9.0
 
+ALTER TABLE `cluster_task` ADD COLUMN `user_id` INT(11);
+CREATE INDEX `cluster_task_creator` ON `cluster_task` (`user_id`);
+
 ALTER TABLE `cluster` ADD COLUMN `creation` DATETIME NOT NULL;
 UPDATE `cluster` SET `creation` = NOW();
