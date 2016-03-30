@@ -1,4 +1,6 @@
 {
+    "cluster-creation": "创建时间",
+
     "task-type-0": "修复迁移状态",
     "task-type-1": "迁移槽位",
     "task-type-2": "扩容",

@@ -24,26 +24,32 @@
   <table style='width: 100%' class='table'>
     <tr>
       <td class='label-cell' data-localize='cluster-id'>集群 ID</td>
-      <td>{{ cluster.id }}</td>
+      <td colspan='2'>{{ cluster.id }}</td>
     </tr>
     <tr>
       <td class='label-cell' data-localize='cluster-description'>集群描述</td>
       <td>
-          <input id='cluster-descr-inp' value="{{ cluster.description|e }}">
-          <button class='btn btn-primary' id='cluster-set-descr'>改</button>
+          <input id='cluster-descr-inp' class='form-control' value="{{ cluster.description|e }}">
+      </td>
+      <td>
+          <button class='btn btn-primary' id='cluster-set-descr' data-localize='cluster-set-descr'>改</button>
       </td>
     </tr>
     <tr>
+      <td class='label-cell' data-localize='cluster-creation'>Creation</td>
+      <td colspan='2'>{{ cluster.creation|strftime }}</td>
+    </tr>
+    <tr>
       <td class='label-cell' data-localize='proxy-num'>代理数</td>
-      <td>{{ cluster.proxies|length }}</td>
+      <td colspan='2'>{{ cluster.proxies|length }}</td>
     </tr>
     <tr>
       <td class='label-cell' data-localize='nodes-num'>节点数</td>
-      <td>{{ cluster.nodes|length }}</td>
+      <td colspan='2'>{{ cluster.nodes|length }}</td>
     </tr>
     <tr>
       <td class='label-cell' data-localize='operating'>操作</td>
-      <td>
+      <td colspan='2'>
         <button class='btn btn-primary' id='cluster-fix-migrating' data-localize='cluster-fix-migrating'>修复槽位迁移</button>
         <button class='btn btn-primary' id='cluster-enable-all-nodes-alert' data-suppress='1' data-localize='cluster-enable-all-nodes-alert'>打开所有节点的报警</button>
         <button class='btn btn-danger' id='cluster-suppress-all-nodes-alert' data-suppress='0' data-localize='cluster-suppress-all-nodes-alert'>关闭所有节点的报警</button>

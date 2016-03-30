@@ -35,8 +35,11 @@ class AutoBalance(base.TestCase):
             self.db.session.add(c1)
             self.db.session.commit()
 
+            c0_id = c0.id
+            c1_id = c1.id
+
             r = client.post('/cluster/set_balance_plan', data={
-                'cluster': c1.id,
+                'cluster': c1_id,
                 'pod': 'pod',
                 'aof': '0',
                 'slave_count': 0,
@@ -56,7 +59,7 @@ class AutoBalance(base.TestCase):
             self.assertEqual(False, p.aof)
 
             r = client.post('/cluster/set_balance_plan', data={
-                'cluster': c0.id,
+                'cluster': c0_id,
                 'pod': 'pod',
                 'aof': '1',
                 'master_host': '10.100.1.1',
@@ -65,7 +68,7 @@ class AutoBalance(base.TestCase):
             })
             self.assertReqStatus(200, r)
             r = client.post('/cluster/del_balance_plan', data={
-                'cluster': c1.id,
+                'cluster': c1_id,
             })
             self.assertReqStatus(200, r)
             p = get_balance_plan_by_addr('10.0.0.2', 6301)
@@ -388,14 +391,3 @@ class AutoBalance(base.TestCase):
                 'aof': '0',
             })
             self.assertReqStatus(200, r)
-
-        with open(file_ipc.POLL_FILE, 'r') as fin:
-            r = json.loads(fin.read())
-            self.assertDictEqual({
-                'nodes': [{
-                    'host': '127.0.0.1',
-                    'port': 6301,
-                    'suppress_alert': 1,
-                }],
-                'proxies': [],
-            }, r)

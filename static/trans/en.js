@@ -14,6 +14,7 @@ window.TRANSLATIONS = {
     '失败': 'Failed',
     'failed': 'Failed',
 
+    '尚未获取节点详细信息': 'WAITING FOR POLLING',
     '此代理已被移除': 'Proxy removed',
     '正在载入集群信息': 'Loading cluster nodes',
     '节点不在集群中': 'Not in a cluster',
