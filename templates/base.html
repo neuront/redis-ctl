@@ -53,6 +53,12 @@ $(document).ready(function() {
             <li><a class='nav-link' href='/nodes/manage/eru'><i class='fa fa-cube'></i> <span data-localize='container-nodes-mgr'>容器节点管理</span></a></li>
             <li><a class='nav-link' href='/task/list_all'><i class='fa fa-tasks'></i> <span data-localize='global-cluster-tasks-list'>集群任务</span></a></li>
             <li><a class='nav-link' href='/stats/pollings'><i class='fa fa-calendar'></i> <span data-localize='polling-stats'>轮询记录</span></a></li>
+
+            {#
+                To change what is displayed after user login
+                    * either override `render_me` in the App class to return a piece of HTML
+                    * or change the template below in the <li> tag
+            #}
             <li class='nav-current-user'>
                 {% autoescape false %}
                     {{ render_me() }}
