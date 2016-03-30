@@ -7,8 +7,9 @@ def main():
     app = handlers.base.app
     with app.app_context():
         for lock in models.base.db.session.query(TaskLock).all():
-            lock.step_id = None
-            models.base.db.session.add(lock)
+            if lock.step is not None:
+                lock.step.complete('Force release lock')
+            models.base.db.session.delete(lock)
         models.base.db.session.commit()
 
 if __name__ == '__main__':

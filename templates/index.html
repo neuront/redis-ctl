@@ -97,6 +97,7 @@ $(function() {
 });
 </script>
 
+{% if user_valid() %}
 <div class="panel panel-success form-horizontal">
   <div class="panel-heading panel-heading-hide-content" style='margin-bottom: 1em'><strong data-localize='register-node'>注册新节点</strong></div>
   <div>
@@ -153,4 +154,6 @@ $('#add-nodes').click(function() {
     }($('#add-nodes-host').val(), portBegin, portEnd);
 });
 </script>
+{% endif %}
+
 {% endblock %}

@@ -416,7 +416,7 @@ $('#quit-cluster-btn,#migrating-slots-btn').click(function() {
                 return $('#quit-cluster-replica').click(function() {
                     var btn = $(this).attr('disabled', 'disabled');
                     $.ajax({
-                        url: '/cluster/quit',
+                        url: '/task/quit',
                         type: 'POST',
                         data: JSON.stringify({
                             host: {{ node.host|tojson }},
@@ -437,7 +437,7 @@ $('#quit-cluster-btn,#migrating-slots-btn').click(function() {
                 return $('#quit-cluster-force').click(function() {
                     var btn = $(this).attr('disabled', 'disabled');
                     $.ajax({
-                        url: '/cluster/quit',
+                        url: '/task/quit',
                         type: 'POST',
                         data: JSON.stringify({
                             host: {{ node.host|tojson }},
@@ -522,13 +522,15 @@ $('#start-cluster-confirm').click(function() {
         descr: $('#start-cluster-descr').val()
     }, function(r) {
         $.ajax({
-            url: '/cluster/launch',
+            url: '/task/launch',
             type: 'POST',
-            data: {
-                host: {{ node.host|tojson }},
-                port: {{ node.port|tojson }},
-                cluster_id: r
-            },
+            data: JSON.stringify({
+                nodes: [{
+                    host: {{ node.host|tojson }},
+                    port: {{ node.port|tojson }},
+                }],
+                cluster: r
+            }),
             success: function() {
                 window.location.reload();
             },

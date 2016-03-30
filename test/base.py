@@ -2,7 +2,6 @@ import os
 import errno
 import hashlib
 import tempfile
-import logging
 import unittest
 
 import config

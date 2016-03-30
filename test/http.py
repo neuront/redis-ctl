@@ -3,12 +3,10 @@ import redistrib.command as comm
 
 import base
 import file_ipc
-import daemonutils.cluster_task
 from models.base import db
 from models.proxy import Proxy
 from models.cluster import Cluster
 import models.task
-import handlers.base
 
 
 class HttpRequest(base.TestCase):
@@ -19,7 +17,6 @@ class HttpRequest(base.TestCase):
             r = client.post('/redis/add', data={
                 'host': '127.0.0.1',
                 'port': '7100',
-                'mem': '1048576',
             })
             self.assertReqStatus(200, r)
             self.assertEqual({
@@ -37,12 +34,15 @@ class HttpRequest(base.TestCase):
             self.assertReqStatus(200, r)
             cluster_id = r.data
 
-            r = client.post('/cluster/launch', data={
-                'cluster_id': cluster_id,
-                'host': '127.0.0.1',
-                'port': 7100,
-            })
+            r = client.post('/task/launch', data=json.dumps({
+                'cluster': cluster_id,
+                'nodes': [{
+                    'host': '127.0.0.1',
+                    'port': 7100,
+                }],
+            }))
             self.assertReqStatus(200, r)
+            self.exec_all_tasks()
 
             self.assertRaises(ValueError, comm.quit_cluster, '127.0.0.1', 7100)
             comm.shutdown_cluster('127.0.0.1', 7100)
@@ -66,7 +66,6 @@ class HttpRequest(base.TestCase):
             r = client.post('/redis/add', data={
                 'host': '127.0.0.1',
                 'port': '7100',
-                'mem': '1048576',
             })
             self.assertReqStatus(200, r)
 
@@ -118,13 +117,11 @@ class HttpRequest(base.TestCase):
             r = client.post('/redis/add', data={
                 'host': '127.0.0.1',
                 'port': '7100',
-                'mem': '1048576',
             })
             self.assertReqStatus(200, r)
             r = client.post('/redis/add', data={
                 'host': '127.0.0.1',
                 'port': '7101',
-                'mem': '1048576',
             })
             self.assertReqStatus(200, r)
 
@@ -134,12 +131,15 @@ class HttpRequest(base.TestCase):
             self.assertReqStatus(200, r)
             cluster_id = r.data
 
-            r = client.post('/cluster/launch', data={
-                'cluster_id': cluster_id,
-                'host': '127.0.0.1',
-                'port': 7100,
-            })
+            r = client.post('/task/launch', data=json.dumps({
+                'cluster': cluster_id,
+                'nodes': [{
+                    'host': '127.0.0.1',
+                    'port': 7100,
+                }],
+            }))
             self.assertReqStatus(200, r)
+            self.exec_all_tasks()
 
             r = client.post('/task/join', data={
                 'cluster_id': cluster_id,
@@ -207,14 +207,12 @@ class HttpRequest(base.TestCase):
             r = client.post('/redis/add', data={
                 'host': '127.0.0.1',
                 'port': '7100',
-                'mem': '1048576',
             })
             self.assertEqual(200, r.status_code)
 
             r = client.post('/redis/add', data={
                 'host': '127.0.0.1',
                 'port': '7101',
-                'mem': '1048576',
             })
             self.assertEqual(200, r.status_code)
 

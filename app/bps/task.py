@@ -96,6 +96,34 @@ def migrate_slots():
     db.session.add(task)
 
 
+@bp.route_post_json('/launch')
+def launch_cluster():
+    req_json = request.get_json(force=True)
+    cluster = models.cluster.get_by_id(req_json['cluster'])
+    if cluster is None:
+        raise ValueError('no such cluster')
+    if len(cluster.nodes) != 0:
+        raise ValueError('cluster serving')
+
+    nodes = []
+    for a in req_json['nodes']:
+        n = models.node.get_by_host_port(a['host'], a['port'])
+        if n is None:
+            raise ValueError('no such node')
+        if n.assignee_id is not None:
+            raise ValueError('node already serving')
+        n.assignee_id = cluster.id
+        db.session.add(n)
+        nodes.append(n)
+
+    task = models.task.ClusterTask(
+        cluster_id=cluster.id, task_type=models.task.TASK_TYPE_LAUNCH,
+        user_id=bp.app.get_user_id())
+    task.add_step('launch', host_port_list=[
+        {'host': n.host, 'port': n.port} for n in nodes])
+    db.session.add(task)
+
+
 @bp.route_post_json('/join')
 def join_cluster():
     c = models.cluster.get_by_id(int(request.form['cluster_id']))
@@ -104,10 +132,17 @@ def join_cluster():
     task = models.task.ClusterTask(
         cluster_id=c.id, task_type=models.task.TASK_TYPE_JOIN,
         user_id=bp.app.get_user_id())
+    node = models.node.get_by_host_port(
+        request.form['host'], int(request.form['port']))
+    if node is None:
+        raise ValueError('no such node')
+    if node.assignee_id is not None:
+        raise ValueError('node already serving')
+
     task.add_step(
         'join', cluster_id=c.id,
         cluster_host=c.nodes[0].host, cluster_port=c.nodes[0].port,
-        newin_host=request.form['host'], newin_port=int(request.form['port']))
+        newin_host=node.host, newin_port=node.port)
     db.session.add(task)
 
 

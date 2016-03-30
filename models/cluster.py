@@ -4,9 +4,6 @@ from werkzeug.utils import cached_property
 
 from base import db, Base, DB_STRING_TYPE
 
-COL_ID = 0
-COL_DESCRIPTION = 1
-
 
 class Cluster(Base):
     __tablename__ = 'cluster'

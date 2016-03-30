@@ -156,7 +156,8 @@
     "task-type-3": "Add slave",
     "task-type-4": "Remove Redis",
     "task-type-5": "Auto expanding",
-    "task-type-6": "Bulk ops",
+    "task-type-6": "Batch ops",
+    "task-type-7": "Launch",
 
     "container-id": "Container ID",
     "mirrored-version": "Mirrored version",

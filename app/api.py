@@ -38,6 +38,7 @@ class RedisApp(Flask):
         self.jinja_env.globals['render'] = render_template
         self.jinja_env.globals['render_user'] = self.render_user_by_id
         self.jinja_env.globals['render_me'] = self.render_me
+        self.jinja_env.globals['user_valid'] = self.access_ctl_user_valid
         self.jinja_env.globals['login_url'] = self.login_url
 
         for u in dir(render_utils):
@@ -88,7 +89,7 @@ class RedisApp(Flask):
         return None
 
     def get_user_id(self):
-        return None
+        return None if g.user is None else g.user.id
 
     def render_user_by_id(self, user_id):
         return '<span data-localize="nobody">-</span>'
