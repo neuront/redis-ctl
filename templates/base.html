@@ -47,9 +47,18 @@ $(document).ready(function() {
     </div>
     <div class='collapse navbar-collapse'>
         <ul class='nav navbar-nav navbar-right'>
+        {% if display_login_entry %}
+            <li><a class='nav-link' href='{{ login_url() }}' data-localize='login'>Login</a></li>
+        {% else %}
             <li><a class='nav-link' href='/nodes/manage/eru'><i class='fa fa-cube'></i> <span data-localize='container-nodes-mgr'>容器节点管理</span></a></li>
             <li><a class='nav-link' href='/task/list_all'><i class='fa fa-tasks'></i> <span data-localize='global-cluster-tasks-list'>集群任务</span></a></li>
             <li><a class='nav-link' href='/stats/pollings'><i class='fa fa-calendar'></i> <span data-localize='polling-stats'>轮询记录</span></a></li>
+            <li class='nav-current-user'>
+                {% autoescape false %}
+                    {{ render_me() }}
+                {% endautoescape %}
+            </li>
+        {% endif %}
         </ul>
     </div>
 </header>

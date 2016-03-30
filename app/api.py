@@ -37,6 +37,8 @@ class RedisApp(Flask):
 
         self.jinja_env.globals['render'] = render_template
         self.jinja_env.globals['render_user'] = self.render_user_by_id
+        self.jinja_env.globals['render_me'] = self.render_me
+        self.jinja_env.globals['login_url'] = self.login_url
 
         for u in dir(render_utils):
             if u.startswith('g_'):
@@ -80,7 +82,7 @@ class RedisApp(Flask):
             g.limit = request.args.get('limit', type=int, default=20)
             g.user = self.get_user()
             g.lang = self.language()
-            g.login_url = self.login_url()
+            g.display_login_entry = self.display_login_entry()
 
     def get_user(self):
         return None
@@ -90,6 +92,12 @@ class RedisApp(Flask):
 
     def render_user_by_id(self, user_id):
         return '<span data-localize="nobody">-</span>'
+
+    def render_me(self):
+        return ''
+
+    def display_login_entry(self):
+        return not self.access_ctl_user_valid()
 
     def access_ctl_user_valid(self):
         return True
