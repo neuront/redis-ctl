@@ -9,5 +9,12 @@
     "task-type-5": "自动扩容",
     "task-type-6": "批量操作",
 
+    "event-type-0": "添加",
+    "event-type-1": "移除",
+    "event-type-2": "配置",
+    "event-type-3": "执行指令",
+
+    "audit-nodes": "节点事件",
+
     "": ""
 }

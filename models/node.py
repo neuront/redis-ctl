@@ -77,6 +77,11 @@ def delete_eru_instance(eru_container_id):
     db.session.delete(i)
 
 
+def get_eru_by_container_id(eru_container_id):
+    return db.session.query(RedisNode).filter(
+        RedisNode.eru_container_id == eru_container_id).first()
+
+
 def delete_free_instance(host, port):
     node = db.session.query(RedisNode).filter(
         RedisNode.host == host,

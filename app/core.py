@@ -15,6 +15,7 @@ blueprints = (
     'cluster',
     'command',
     'task',
+    'audit',
 )
 
 
@@ -102,6 +103,9 @@ class RedisApp(Flask):
 
     def access_ctl_user_valid(self):
         return True
+
+    def default_user_id(self):
+        return None
 
     def language(self):
         lang = request.headers.get('Accept-Language')

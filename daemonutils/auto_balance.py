@@ -4,6 +4,7 @@ from thirdparty.eru_utils import deploy_node, rm_containers
 from models.base import db
 import models.node
 import models.task
+import models.audit
 
 
 def _deploy_node(pod, aof, host):
@@ -50,16 +51,18 @@ def _prepare_master_node(node, pod, aof, host):
 
 def _add_slaves(slaves, task, cluster_id, master_host, pod, aof):
     cids = []
+    hosts = []
     try:
         for s in slaves:
             logging.info('Auto deploy slave for master %s [task %d],'
                          ' use host %s', master_host, task.id, s.get('host'))
             cid, new_host = _deploy_node(pod, aof, s.get('host'))
             cids.append(cid)
+            hosts.append(new_host)
             task.add_step('replicate', cluster_id=cluster_id,
                           master_host=master_host, master_port=6379,
                           slave_host=new_host, slave_port=6379)
-        return cids
+        return cids, hosts
     except BaseException as exc:
         logging.info('Remove container %s and rollback', cids)
         _rm_containers(cids)
@@ -83,10 +86,13 @@ def add_node_to_balance_for(host, port, plan, slots, app):
     task, cid, new_host = _prepare_master_node(
         node, plan.pod, plan.aof, plan.host)
     cids = [cid]
+    hosts = [new_host]
     try:
-        cids.extend(_add_slaves(
+        cs, hs = _add_slaves(
             plan.slaves, task, node.assignee_id,
-            new_host, plan.pod, plan.aof))
+            new_host, plan.pod, plan.aof)
+        cids.extend(cs)
+        hosts.extend(hs)
 
         migrating_slots = slots[: len(slots) / 2]
         task.add_step(
@@ -100,6 +106,10 @@ def add_node_to_balance_for(host, port, plan, slots, app):
         if lock is not None:
             logging.info('Auto balance task %d has been emit; lock id=%d',
                          task.id, lock.id)
+            for h in hosts:
+                models.audit.eru_event(
+                    h, 6379, models.audit.EVENT_TYPE_CREATE,
+                    app.default_user_id(), plan.balance_plan_json)
             return app.write_polling_targets()
         logging.info('Auto balance task fail to lock,'
                      ' discard auto balance this time.'

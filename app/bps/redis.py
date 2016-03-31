@@ -2,6 +2,7 @@ from flask import render_template, abort, request
 
 from app.bpbase import Blueprint
 import models.node
+import models.audit
 
 bp = Blueprint('redis', __name__, url_prefix='/redis')
 
@@ -32,11 +33,17 @@ def node_panel(host, port):
 
 @bp.route_post_json('/add', True)
 def add_redis():
-    models.node.create_instance(
-        request.form['host'], int(request.form['port']))
+    host = request.form['host']
+    port = int(request.form['port'])
+    models.node.create_instance(host, port)
+    models.audit.raw_event(host, port, models.audit.EVENT_TYPE_CREATE,
+                           bp.app.get_user_id())
 
 
 @bp.route_post_json('/del', True)
 def del_redis():
-    models.node.delete_free_instance(
-        request.form['host'], int(request.form['port']))
+    host = request.form['host']
+    port = int(request.form['port'])
+    models.node.delete_free_instance(host, port)
+    models.audit.raw_event(host, port, models.audit.EVENT_TYPE_DELETE,
+                           bp.app.get_user_id())

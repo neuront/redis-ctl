@@ -6,6 +6,7 @@ from redistrib.command import list_masters
 
 from app.utils import json_response
 from app.bpbase import Blueprint
+import models.audit
 
 bp = Blueprint('command', __name__, url_prefix='/cmd')
 
@@ -76,12 +77,17 @@ def get_masters_info():
         })
 
 
-@bp.route_post('/exec')
+@bp.route_post_json('/exec')
 def node_exec_command():
+    host = request.form['host']
+    port = int(request.form['port'])
+    args = json.loads(request.form['cmd'])
+    models.audit.raw_event(
+        host, port, models.audit.EVENT_TYPE_EXEC, bp.app.get_user_id(), args)
     try:
-        with Talker(request.form['host'], int(request.form['port'])) as t:
+        with Talker(host, port) as t:
             try:
-                r = t.talk(*json.loads(request.form['cmd']))
+                r = t.talk(*args)
             except ValueError as e:
                 r = None if e.message == 'No reply' else (
                     '-ERROR: ' + e.message)
@@ -89,7 +95,7 @@ def node_exec_command():
                 r = '-' + e.message
     except Exception as e:
         r = '!ERROR: ' + (e.message or ('%s' % e))
-    return json_response(r)
+    return r
 
 
 MAXMEM_LIMIT_LOW = 64 * 1000 * 1000
@@ -101,9 +107,13 @@ def node_set_max_mem():
         raise ValueError('invalid max_mem size')
     host = request.form['host']
     port = int(request.form['port'])
-    with Talker(request.form['host'], int(request.form['port'])) as t:
+
+    models.audit.raw_event(
+        host, port, models.audit.EVENT_TYPE_CONFIG, bp.app.get_user_id(),
+        {'max_mem': max_mem})
+
+    with Talker(host, port) as t:
         m = t.talk('config', 'set', 'maxmemory', str(max_mem))
         if 'ok' != m.lower():
             raise ValueError('CONFIG SET MAXMEMROY redis %s:%d returns %s' % (
                 host, port, m))
-    return ''

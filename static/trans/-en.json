@@ -159,6 +159,11 @@
     "task-type-6": "Batch ops",
     "task-type-7": "Launch",
 
+    "event-type-0": "Create",
+    "event-type-1": "Remove",
+    "event-type-2": "Config",
+    "event-type-3": "Command",
+
     "container-id": "Container ID",
     "mirrored-version": "Mirrored version",
     "create-time": "Create time",

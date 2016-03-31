@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 import base
 import config
 import file_ipc
+import models.audit
 import models.node
 import models.proxy
 import models.cluster
@@ -46,6 +47,10 @@ if eru_client is not None:
                 host=request.form.get('host'), port=port)
             models.node.create_eru_instance(container_info['address'], port,
                                             container_info['container_id'])
+            models.audit.eru_event(
+                container_info['address'], port,
+                models.audit.EVENT_TYPE_CREATE, base.app.get_user_id(),
+                request.form)
             return base.json_result(container_info)
         except IntegrityError:
             if container_info is not None:
@@ -75,6 +80,10 @@ if eru_client is not None:
                 container_info['container_id'])
             _set_proxy_remote(container_info['address'], port,
                               cluster.nodes[0].host, cluster.nodes[0].port)
+            models.audit.eru_event(
+                container_info['address'], port,
+                models.audit.EVENT_TYPE_CREATE, base.app.get_user_id(),
+                request.form)
             return base.json_result(container_info)
         except IntegrityError:
             if container_info is not None:
@@ -88,10 +97,16 @@ if eru_client is not None:
     def delete_eru_node(request):
         eru_container_id = request.form['id']
         if request.form['type'] == 'node':
+            n = models.node.get_eru_by_container_id(eru_container_id)
             models.node.delete_eru_instance(eru_container_id)
         else:
+            n = models.proxy.get_eru_by_container_id(eru_container_id)
             models.proxy.delete_eru_instance(eru_container_id)
         rm_containers([eru_container_id])
+
+        models.audit.eru_event(
+            n.host, n.port, models.audit.EVENT_TYPE_DELETE,
+            base.app.get_user_id())
 
     @base.post_async('/nodes/revive/eru')
     def revive_eru_node(request):
