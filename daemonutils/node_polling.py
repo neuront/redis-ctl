@@ -11,33 +11,25 @@ from models.polling_stat import PollingStat
 
 
 class Poller(threading.Thread):
-    def __init__(self, nodes, app):
+    def __init__(self, nodes):
         threading.Thread.__init__(self)
         self.daemon = True
         self.nodes = nodes
-        self.app = app
         logging.debug('Poller %x distributed %d nodes',
                       id(self), len(self.nodes))
 
     def run(self):
         for node in self.nodes:
-            logging.debug('Poller %x collect for %s:%d',
-                          id(self), node['host'], node['port'])
-            node.collect_stats(self._emit_data, self.app.send_alarm)
-
-    def _emit_data(self, addr, points):
-        try:
-            self.app.stats_write(addr, points)
-        except StandardError as e:
-            logging.exception(e)
+            node.collect_stats()
 
 CACHING_NODES = {}
 
 
-def _load_from(cls, nodes):
+def _load_from(cls, app, nodes):
     def update_node_settings(node, file_settings):
         node.suppress_alert = file_settings.get('suppress_alert')
         node.balance_plan = file_settings.get('balance_plan')
+        node.app = app
 
     r = []
     for n in nodes:
@@ -83,15 +75,15 @@ class NodeStatCollector(threading.Thread):
 
     def _shot(self):
         poll = file_ipc.read_poll()
-        nodes = _load_from(RedisNodeStatus, poll['nodes'])
-        proxies = _load_from(ProxyStatus, poll['proxies'])
+        nodes = _load_from(RedisNodeStatus, self.app, poll['nodes'])
+        proxies = _load_from(ProxyStatus, self.app, poll['proxies'])
         # commit because `get_by` may create new nodes
         # to reattach session they must be persisted
         commit_session()
 
         all_nodes = nodes + proxies
         random.shuffle(all_nodes)
-        pollers = [Poller(all_nodes[i: i + NODES_EACH_THREAD], self.app)
+        pollers = [Poller(all_nodes[i: i + NODES_EACH_THREAD])
                    for i in xrange(0, len(all_nodes), NODES_EACH_THREAD)]
         for p in pollers:
             p.start()

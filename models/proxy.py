@@ -76,7 +76,7 @@ def list_all():
 def list_eru_proxies(offset, limit):
     return db.session.query(Proxy).filter(
         Proxy.eru_container_id != None).order_by(
-        Proxy.id.desc()).offset(offset).limit(limit).all()
+            Proxy.id.desc()).offset(offset).limit(limit).all()
 
 
 def list_ip():

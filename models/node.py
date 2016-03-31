@@ -48,7 +48,7 @@ def get_by_host_port(host, port):
 def list_eru_nodes(offset, limit):
     return db.session.query(RedisNode).filter(
         RedisNode.eru_container_id != None).order_by(
-        RedisNode.id.desc()).offset(offset).limit(limit).all()
+            RedisNode.id.desc()).offset(offset).limit(limit).all()
 
 
 def list_all_nodes():
@@ -84,15 +84,3 @@ def delete_free_instance(host, port):
         RedisNode.assignee_id == None).with_for_update().first()
     if node is not None:
         db.session.delete(node)
-
-
-def pick_and_launch(host, port, cluster_id, start_cluster):
-    logging.info('Launching cluster for [ %d ]', cluster_id)
-    node = db.session.query(RedisNode).filter(
-        RedisNode.host == host, RedisNode.port == port,
-        RedisNode.assignee_id == None).first()
-    if node is None:
-        raise ValueError('no such node')
-    start_cluster(node.host, node.port)
-    node.assignee_id = cluster_id
-    db.session.add(node)

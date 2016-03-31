@@ -1,4 +1,3 @@
-import time
 import logging
 from retrying import retry
 from redistrib.clusternode import Talker, pack_command, ClusterNode
@@ -6,7 +5,9 @@ from hiredis import ReplyError
 
 from thirdparty.eru_utils import eru_client
 from config import REDIS_CONNECT_TIMEOUT as CONNECT_TIMEOUT
-from models.base import db, Base
+import auto_balance
+from models.stats_base import RedisStatsBase, ProxyStatsBase
+from models.cluster_plan import get_balance_plan_by_addr
 
 CMD_INFO = pack_command('info')
 CMD_GET_MAXMEM = pack_command('config', 'get', 'maxmemory')
@@ -52,100 +53,27 @@ def _info_detail(t):
     return details
 
 
-class NodeBase(Base):
-    __abstract__ = True
-
-    addr = db.Column('addr', db.String(255), unique=True, nullable=False)
-    poll_count = db.Column('poll_count', db.Integer, nullable=False)
-    avail_count = db.Column('avail_count', db.Integer, nullable=False)
-
+class RedisNodeStatus(RedisStatsBase):
     def __init__(self, *args, **kwargs):
-        Base.__init__(self, *args, **kwargs)
-        self.suppress_alert = 1
-        self.details = {}
-
-    @classmethod
-    def get_by(cls, host, port):
-        addr = '%s:%d' % (host, port)
-        n = db.session.query(cls).filter(cls.addr == addr).first()
-        if n is None:
-            n = cls(addr=addr, poll_count=0, avail_count=0)
-            db.session.add(n)
-            db.session.flush()
-        n.details = {'host': host, 'port': port}
-        return n
-
-    def set_available(self):
-        self.avail_count += 1
-        self.poll_count += 1
-        self.details['stat'] = True
-        self.details['sla'] = self.sla()
-
-    def set_unavailable(self):
-        self.poll_count += 1
-        self.details['stat'] = False
-        self.details['sla'] = self.sla()
-
-    def __getitem__(self, key):
-        return self.details[key]
-
-    def get(self, key, default=None):
-        return self.details.get(key, default)
-
-    def sla(self):
-        if self.poll_count == 0:
-            return 0
-        return float(self.avail_count) / self.poll_count
-
-    def stats_data(self):
-        raise NotImplementedError()
-
-    def collect_stats(self, emit_func, alarm_func):
-        try:
-            self._collect_stats(alarm_func)
-            emit_func(self.addr, self.stats_data())
-        except (IOError, ValueError, LookupError, ReplyError) as e:
-            logging.error('Fail to retrieve info of %s:%d',
-                          self.details['host'], self.details['port'])
-            logging.exception(e)
-            self.set_unavailable()
-            self.send_alarm(alarm_func)
-
-    def _collect_stats(self, alarm_func):
-        raise NotImplementedError()
-
-    def send_alarm(self, alarm_func):
-        logging.debug('Send alarm to %s suppressed %s', self.addr,
-                      self.suppress_alert)
-        if self.suppress_alert != 1:
-            self._send_alarm(alarm_func)
-
-    def _send_alarm(self, alarm_func):
-        raise NotImplementedError()
-
-    def add_to_db(self):
-        db.session.add(self)
-
-
-class RedisNodeStatus(NodeBase):
-    __tablename__ = 'redis_node_status'
+        RedisStatsBase.__init__(self, *args, **kwargs)
 
     def stats_data(self):
         return {
-            'used_memory': self['used_memory'],
-            'used_memory_rss': self['used_memory_rss'],
-            'connected_clients': self['connected_clients'],
-            'total_commands_processed': self['total_commands_processed'],
-            'expired_keys': self['expired_keys'],
-            'evicted_keys': self['evicted_keys'],
-            'keyspace_hits': self['keyspace_hits'],
-            'keyspace_misses': self['keyspace_misses'],
-            'used_cpu_sys': self['used_cpu_sys'],
-            'used_cpu_user': self['used_cpu_user'],
+            'used_memory': self.details['used_memory'],
+            'used_memory_rss': self.details['used_memory_rss'],
+            'connected_clients': self.details['connected_clients'],
+            'total_commands_processed': self.details[
+                'total_commands_processed'],
+            'expired_keys': self.details['expired_keys'],
+            'evicted_keys': self.details['evicted_keys'],
+            'keyspace_hits': self.details['keyspace_hits'],
+            'keyspace_misses': self.details['keyspace_misses'],
+            'used_cpu_sys': self.details['used_cpu_sys'],
+            'used_cpu_user': self.details['used_cpu_user'],
         }
 
     @retry(stop_max_attempt_number=5, wait_fixed=500)
-    def _collect_stats(self, alarm_func):
+    def _collect_stats(self):
         with Talker(self.details['host'], self.details['port'],
                     CONNECT_TIMEOUT) as t:
             details = _info_detail(t)
@@ -187,9 +115,6 @@ class RedisNodeStatus(NodeBase):
             logging.exception(e)
 
     def _check_capacity(self):
-        import auto_balance
-        from models.cluster_plan import get_balance_plan_by_addr
-
         if (eru_client is None
                 or not self.details['cluster_enabled']
                 or not self.details['stat']
@@ -213,31 +138,27 @@ class RedisNodeStatus(NodeBase):
         auto_balance.add_node_to_balance_for(
             host, int(port), plan, self.details['slots'])
 
-    def _send_alarm(self, alarm_func):
-        alarm_func('Redis Failed %s:%d' % (
-            self.details['host'], self.details['port']), '')
 
-
-class ProxyStatus(NodeBase):
-    __tablename__ = 'proxy_status'
+class ProxyStatus(ProxyStatsBase):
+    def __init__(self, *args, **kwargs):
+        ProxyStatsBase.__init__(self, *args, **kwargs)
 
     def stats_data(self):
         return {
-            'mem_buffer_alloc': self['mem_buffer_alloc'],
-            'connected_clients': self['connected_clients'],
-            'completed_commands': self['completed_commands'],
-            'total_process_elapse': self['total_process_elapse'],
-            'command_elapse': self['command_elapse'],
-            'remote_cost': self['remote_cost'],
-            'used_cpu_sys': self['used_cpu_sys'],
-            'used_cpu_user': self['used_cpu_user'],
+            'mem_buffer_alloc': self.details['mem_buffer_alloc'],
+            'connected_clients': self.details['connected_clients'],
+            'completed_commands': self.details['completed_commands'],
+            'total_process_elapse': self.details['total_process_elapse'],
+            'command_elapse': self.details['command_elapse'],
+            'remote_cost': self.details['remote_cost'],
+            'used_cpu_sys': self.details['used_cpu_sys'],
+            'used_cpu_user': self.details['used_cpu_user'],
         }
 
     @retry(stop_max_attempt_number=5, wait_fixed=500)
-    def _collect_stats(self, alarm_func):
+    def _collect_stats(self):
         with Talker(self.details['host'], self.details['port'],
                     CONNECT_TIMEOUT) as t:
-            now = time.time()
             i = t.talk_raw(CMD_PROXY)
             lines = i.split('\n')
             st = {}
@@ -270,17 +191,13 @@ class ProxyStatus(NodeBase):
 
             if 'last_remote_cost' in st:
                 self.details['remote_cost'] = max(
-                    [float(x) for x in
-                     st['last_remote_cost'].split(',')])
+                    [float(x) for x in st['last_remote_cost'].split(',')])
             else:
                 self.details['remote_cost'] = 0
 
             if cluster_ok:
                 self.set_available()
             else:
-                self.send_alarm(alarm_func)
+                self.send_alarm('Cluster failed for Cerberus %s:%d' % (
+                    self.details['host'], self.details['port']), '')
                 self.set_unavailable()
-
-    def _send_alarm(self, alarm_func):
-        alarm_func('Cerberus Failed %s:%d' % (
-            self.details['host'], self.details['port']), '')

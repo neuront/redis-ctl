@@ -4,13 +4,11 @@ import gevent.monkey
 gevent.monkey.patch_all()
 
 import config
-from daemonutils import stats_models as _
+from daemonutils.node_polling import NodeStatCollector
+from daemonutils.cluster_task import TaskPoller
 
 
 def run(interval, app):
-    from daemonutils.node_polling import NodeStatCollector
-    from daemonutils.cluster_task import TaskPoller
-
     daemons = [
         TaskPoller(app, interval),
         NodeStatCollector(app, interval),
