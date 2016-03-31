@@ -243,7 +243,7 @@ class HttpRequest(base.TestCase):
             })
             self.assertEqual(200, r.status_code)
 
-            file_ipc.write_nodes_proxies_from_db()
+            self.app.write_polling_targets()
             with open(file_ipc.POLL_FILE, 'r') as fin:
                 polls = json.loads(fin.read())
 
@@ -286,7 +286,7 @@ class HttpRequest(base.TestCase):
             self.assertEqual(400, r.status_code)
             self.assertEqual({'reason': 'no such node'}, json.loads(r.data))
 
-            file_ipc.write_nodes_proxies_from_db()
+            self.app.write_polling_targets()
             with open(file_ipc.POLL_FILE, 'r') as fin:
                 polls = json.loads(fin.read())
 

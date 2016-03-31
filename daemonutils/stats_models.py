@@ -136,7 +136,7 @@ class RedisNodeStatus(RedisStatsBase):
                      ' used memory %d / %d max memory', self.addr,
                      self.details['used_memory'], maxmem)
         auto_balance.add_node_to_balance_for(
-            host, int(port), plan, self.details['slots'])
+            host, int(port), plan, self.details['slots'], self.app)
 
 
 class ProxyStatus(ProxyStatsBase):

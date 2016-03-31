@@ -3,7 +3,6 @@ import logging
 import random
 import threading
 
-import file_ipc
 from config import NODES_EACH_THREAD
 from stats_models import RedisNodeStatus, ProxyStatus
 from models.base import db, commit_session
@@ -74,7 +73,7 @@ class NodeStatCollector(threading.Thread):
         self.interval = interval
 
     def _shot(self):
-        poll = file_ipc.read_poll()
+        poll = self.app.polling_targets()
         nodes = _load_from(RedisNodeStatus, self.app, poll['nodes'])
         proxies = _load_from(ProxyStatus, self.app, poll['proxies'])
         # commit because `get_by` may create new nodes

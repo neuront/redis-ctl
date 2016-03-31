@@ -98,7 +98,7 @@ class AutoBalance(base.TestCase):
                 'pod': 'std',
                 'aof': True,
                 'slaves': [],
-            }), [2, 3, 5, 7])
+            }), [2, 3, 5, 7], self.app)
             self.assertTrue(1 in self.eru_client.deployed)
             self.assertDictEqual({
                 'what': 'redis',
@@ -159,7 +159,7 @@ class AutoBalance(base.TestCase):
                 'pod': 'std',
                 'aof': True,
                 'slaves': [{}, {}],
-            }), [2, 3, 5, 7, 11, 13, 17])
+            }), [2, 3, 5, 7, 11, 13, 17], self.app)
             self.assertTrue(1 in self.eru_client.deployed)
             self.assertDictEqual({
                 'what': 'redis',
@@ -238,8 +238,17 @@ class AutoBalance(base.TestCase):
             c.nodes.append(n)
             self.db.session.add(c)
             self.db.session.commit()
+            self.app.write_polling_targets()
 
             cluster_id = c.id
+            self.assertEqual({
+                'nodes': [{
+                    'host': '127.0.0.1',
+                    'port': 6301,
+                    'suppress_alert': 1,
+                }],
+                'proxies': [],
+            }, self.app.polling_targets())
 
             self.replace_eru_client()
             add_node_to_balance_for('127.0.0.1', 6301, _get_balance_plan({
@@ -247,7 +256,7 @@ class AutoBalance(base.TestCase):
                 'aof': True,
                 'host': '10.0.1.173',
                 'slaves': [{}, {'host': '10.0.1.174'}],
-            }), [2, 3, 5, 7, 11, 13, 17, 19])
+            }), [2, 3, 5, 7, 11, 13, 17, 19], self.app)
             self.assertTrue(1 in self.eru_client.deployed)
             self.assertDictEqual({
                 'what': 'redis',
@@ -339,6 +348,27 @@ class AutoBalance(base.TestCase):
                 'slots': [2, 3, 5, 7],
             }, s.args)
 
+            self.assertEqual({
+                'nodes': [{
+                    'host': '127.0.0.1',
+                    'port': 6301,
+                    'suppress_alert': 1,
+                }, {
+                    'host': '10.0.0.1',
+                    'port': 6379,
+                    'suppress_alert': 1,
+                }, {
+                    'host': '10.0.0.2',
+                    'port': 6379,
+                    'suppress_alert': 1,
+                }, {
+                    'host': '10.0.0.3',
+                    'port': 6379,
+                    'suppress_alert': 1,
+                }],
+                'proxies': [],
+            }, self.app.polling_targets())
+
     def test_interrupted_after_deploy_some(self):
         class EruClientLimited(base.FakeEruClientBase):
             def __init__(self, limit):
@@ -367,7 +397,7 @@ class AutoBalance(base.TestCase):
                     'pod': 'std',
                     'aof': True,
                     'slaves': [{}, {}],
-                }), [2, 3, 5, 7, 11, 13, 17])
+                }), [2, 3, 5, 7, 11, 13, 17], self.app)
 
             self.assertEqual(0, len(self.eru_client.deployed))
 

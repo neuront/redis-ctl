@@ -1,6 +1,5 @@
 import logging
 
-import file_ipc
 from thirdparty.eru_utils import deploy_node, rm_containers
 from models.base import db
 import models.node
@@ -68,7 +67,7 @@ def _add_slaves(slaves, task, cluster_id, master_host, pod, aof):
         raise
 
 
-def add_node_to_balance_for(host, port, plan, slots):
+def add_node_to_balance_for(host, port, plan, slots, app):
     node = models.node.get_by_host_port(host, int(port))
     if node is None or node.assignee_id is None:
         logging.info(
@@ -101,8 +100,7 @@ def add_node_to_balance_for(host, port, plan, slots):
         if lock is not None:
             logging.info('Auto balance task %d has been emit; lock id=%d',
                          task.id, lock.id)
-            file_ipc.write_nodes_proxies_from_db()
-            return
+            return app.write_polling_targets()
         logging.info('Auto balance task fail to lock,'
                      ' discard auto balance this time.'
                      ' Delete container id=%s', cids)
