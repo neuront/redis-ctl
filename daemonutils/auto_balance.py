@@ -24,12 +24,13 @@ def _rm_containers(cids):
             logging.exception(e)
 
 
-def _prepare_master_node(node, pod, aof, host):
+def _prepare_master_node(node, pod, aof, host, app):
     cid, new_node_host = _deploy_node(pod, aof, host)
     try:
         task = models.task.ClusterTask(
             cluster_id=node.assignee_id,
-            task_type=models.task.TASK_TYPE_AUTO_BALANCE)
+            task_type=models.task.TASK_TYPE_AUTO_BALANCE,
+            user_id=app.default_user_id())
         db.session.add(task)
         db.session.flush()
         logging.info(
@@ -84,7 +85,7 @@ def add_node_to_balance_for(host, port, plan, slots, app):
         return
 
     task, cid, new_host = _prepare_master_node(
-        node, plan.pod, plan.aof, plan.host)
+        node, plan.pod, plan.aof, plan.host, app)
     cids = [cid]
     hosts = [new_host]
     try:
