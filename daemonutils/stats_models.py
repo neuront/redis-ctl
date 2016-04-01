@@ -3,7 +3,6 @@ from retrying import retry
 from redistrib.clusternode import Talker, pack_command, ClusterNode
 from hiredis import ReplyError
 
-from thirdparty.eru_utils import eru_client
 from config import REDIS_CONNECT_TIMEOUT as CONNECT_TIMEOUT
 import auto_balance
 from models.stats_base import RedisStatsBase, ProxyStatsBase
@@ -115,7 +114,7 @@ class RedisNodeStatus(RedisStatsBase):
             logging.exception(e)
 
     def _check_capacity(self):
-        if (eru_client is None
+        if (self.app.docker_client is None
                 or not self.details['cluster_enabled']
                 or not self.details['stat']
                 or len(self.details['slots']) == 0

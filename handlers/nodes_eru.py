@@ -5,14 +5,11 @@ from redistrib.clusternode import Talker
 from sqlalchemy.exc import IntegrityError
 
 import base
-import config
 import file_ipc
 import models.audit
 import models.node
 import models.proxy
 import models.cluster
-from thirdparty.eru_utils import (deploy_node, deploy_proxy, rm_containers,
-                                  eru_client, revive_container)
 
 
 def _set_proxy_remote(proxy_addr, proxy_port, redis_host, redis_port):
@@ -26,13 +23,14 @@ def _set_proxy_remote(proxy_addr, proxy_port, redis_host, redis_port):
     threading.Thread(target=set_remotes).start()
 
 
-if eru_client is not None:
+if base.app.docker_client is not None:
     @base.get_async('/eru/list_hosts/<pod>')
     def eru_list_pod_hosts(request, pod):
+        pods = base.app.docker_client.list_pod_hosts(pod)
         return base.json_result([{
             'name': r['name'],
             'addr': r['addr'],
-        } for r in eru_client.list_pod_hosts(pod) if r['is_alive']])
+        } for r in pods if r['is_alive']])
 
     @base.post_async('/nodes/create/eru_node')
     def create_eru_node(request):
@@ -41,7 +39,7 @@ if eru_client is not None:
             port = int(request.form.get('port', 6379))
             if not 6000 <= port <= 7999:
                 raise ValueError('invalid port')
-            container_info = deploy_node(
+            container_info = base.app.docker_client.deploy_node(
                 request.form['pod'], request.form['aof'] == 'y',
                 request.form['netmode'], request.form['cluster'] == 'y',
                 host=request.form.get('host'), port=port)
@@ -54,7 +52,8 @@ if eru_client is not None:
             return base.json_result(container_info)
         except IntegrityError:
             if container_info is not None:
-                rm_containers([container_info['container_id']])
+                base.app.docker_clientrm_containers(
+                    [container_info['container_id']])
             raise ValueError('exists')
         except BaseException as exc:
             logging.exception(exc)
@@ -70,7 +69,7 @@ if eru_client is not None:
             port = int(request.form.get('port', 8889))
             if not 8000 <= port <= 9999:
                 raise ValueError('invalid port')
-            container_info = deploy_proxy(
+            container_info = base.app.docker_client.deploy_proxy(
                 request.form['pod'], int(request.form['threads']),
                 request.form.get('read_slave') == 'rs',
                 request.form['netmode'], host=request.form.get('host'),
@@ -87,7 +86,8 @@ if eru_client is not None:
             return base.json_result(container_info)
         except IntegrityError:
             if container_info is not None:
-                rm_containers([container_info['container_id']])
+                base.app.docker_clientrm_containers(
+                    [container_info['container_id']])
             raise ValueError('exists')
         except BaseException as exc:
             logging.exception(exc)
@@ -102,7 +102,7 @@ if eru_client is not None:
         else:
             n = models.proxy.get_eru_by_container_id(eru_container_id)
             models.proxy.delete_eru_instance(eru_container_id)
-        rm_containers([eru_container_id])
+        base.app.docker_clientrm_containers([eru_container_id])
 
         models.audit.eru_event(
             n.host, n.port, models.audit.EVENT_TYPE_DELETE,
@@ -110,7 +110,7 @@ if eru_client is not None:
 
     @base.post_async('/nodes/revive/eru')
     def revive_eru_node(request):
-        revive_container(request.form['id'])
+        base.app.docker_clientrevive_container(request.form['id'])
         p = models.proxy.get_eru_by_container_id(request.form['id'])
         if p is not None:
             logging.info('Revive and setremotes for proxy %d, cluster #%d',
@@ -122,13 +122,12 @@ if eru_client is not None:
 @base.get('/nodes/manage/eru/')
 def nodes_manage_page_eru(request):
     pods = []
-    if eru_client is not None:
-        pods = eru_client.list_pods()
+    if base.app.docker_client is not None:
+        pods = base.app.docker_client.list_pods()
     if len(pods) == 0:
-        return request.render('node/no_eru.html', eru_client=eru_client), 400
-    return request.render(
-        'node/manage_eru.html', eru_url=config.ERU_URL, pods=pods,
-        clusters=models.cluster.list_all())
+        return request.render('node/no_eru.html'), 400
+    return request.render('node/manage_eru.html',
+                          pods=pods, clusters=models.cluster.list_all())
 
 
 @base.paged('/nodes/manage/eru/nodes')

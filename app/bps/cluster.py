@@ -6,7 +6,6 @@ from redistrib.exceptions import RedisStatusError
 
 from app.bpbase import Blueprint
 from app.utils import json_response
-from thirdparty import eru_utils
 from models.base import db
 import models.cluster
 import models.node as nm
@@ -37,9 +36,10 @@ def cluster_panel(cluster_id):
     proxy_details = all_details['proxies']
     for p in c.proxies:
         p.details = proxy_details.get('%s:%d' % (p.host, p.port), {})
-    return render_template('cluster/panel.html', cluster=c, nodes=nodes,
-                           eru_client=eru_utils.eru_client, plan_max_slaves=3,
-                           stats_enabled=bp.app.stats_enabled())
+    return render_template(
+        'cluster/panel.html', cluster=c, nodes=nodes,
+        docker_client=bp.app.docker_client, plan_max_slaves=3,
+        stats_enabled=bp.app.stats_enabled())
 
 
 @bp.route('/list')

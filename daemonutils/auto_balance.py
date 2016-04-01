@@ -1,22 +1,21 @@
 import logging
 
-from thirdparty.eru_utils import deploy_node, rm_containers
 from models.base import db
 import models.node
 import models.task
 import models.audit
 
 
-def _deploy_node(pod, aof, host):
-    depl = deploy_node(pod, aof, 'macvlan', host=host)
+def _deploy_node(pod, aof, host, app):
+    depl = app.docker_client.deploy_node(pod, aof, 'macvlan', host=host)
     cid = depl['container_id']
     h = depl['address']
     models.node.create_eru_instance(h, 6379, cid)
     return cid, h
 
 
-def _rm_containers(cids):
-    rm_containers(cids)
+def _rm_containers(cids, app):
+    app.docker_client.rm_containers(cids)
     for c in cids:
         try:
             models.node.delete_eru_instance(c)
@@ -25,7 +24,7 @@ def _rm_containers(cids):
 
 
 def _prepare_master_node(node, pod, aof, host, app):
-    cid, new_node_host = _deploy_node(pod, aof, host)
+    cid, new_node_host = _deploy_node(pod, aof, host, app)
     try:
         task = models.task.ClusterTask(
             cluster_id=node.assignee_id,
@@ -45,19 +44,19 @@ def _prepare_master_node(node, pod, aof, host, app):
     except BaseException as exc:
         logging.exception(exc)
         logging.info('Remove container %s and rollback', cid)
-        _rm_containers([cid])
+        _rm_containers([cid], app)
         db.session.rollback()
         raise
 
 
-def _add_slaves(slaves, task, cluster_id, master_host, pod, aof):
+def _add_slaves(slaves, task, cluster_id, master_host, pod, aof, app):
     cids = []
     hosts = []
     try:
         for s in slaves:
             logging.info('Auto deploy slave for master %s [task %d],'
                          ' use host %s', master_host, task.id, s.get('host'))
-            cid, new_host = _deploy_node(pod, aof, s.get('host'))
+            cid, new_host = _deploy_node(pod, aof, s.get('host'), app)
             cids.append(cid)
             hosts.append(new_host)
             task.add_step('replicate', cluster_id=cluster_id,
@@ -66,7 +65,7 @@ def _add_slaves(slaves, task, cluster_id, master_host, pod, aof):
         return cids, hosts
     except BaseException as exc:
         logging.info('Remove container %s and rollback', cids)
-        _rm_containers(cids)
+        _rm_containers(cids, app)
         db.session.rollback()
         raise
 
@@ -91,7 +90,7 @@ def add_node_to_balance_for(host, port, plan, slots, app):
     try:
         cs, hs = _add_slaves(
             plan.slaves, task, node.assignee_id,
-            new_host, plan.pod, plan.aof)
+            new_host, plan.pod, plan.aof, app)
         cids.extend(cs)
         hosts.extend(hs)
 
@@ -115,9 +114,9 @@ def add_node_to_balance_for(host, port, plan, slots, app):
         logging.info('Auto balance task fail to lock,'
                      ' discard auto balance this time.'
                      ' Delete container id=%s', cids)
-        _rm_containers(cids)
+        _rm_containers(cids, app)
     except BaseException as exc:
         logging.info('Remove container %s and rollback', cids)
-        _rm_containers(cids)
+        _rm_containers(cids, app)
         db.session.rollback()
         raise

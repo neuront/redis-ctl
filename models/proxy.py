@@ -21,10 +21,10 @@ class Proxy(Base):
 
     @cached_property
     def eru_info(self):
-        from thirdparty import eru_utils
-        if eru_utils.eru_client is None or not self.eru_deployed:
+        from flask import g
+        if g.docker_client is None or not self.eru_deployed:
             return None
-        return eru_utils.eru_client.get_container(self.eru_container_id)
+        return g.docker_client.get_container(self.eru_container_id)
 
     @cached_property
     def cluster(self):

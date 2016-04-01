@@ -4,7 +4,6 @@ from eruhttp import EruException
 
 from base import db, Base
 from cluster import Cluster
-from thirdparty import eru_utils
 
 
 class RedisNode(Base):
@@ -27,10 +26,11 @@ class RedisNode(Base):
 
     @cached_property
     def eru_info(self):
-        if eru_utils.eru_client is None or not self.eru_deployed:
+        from flask import g
+        if g.docker_client is None or not self.eru_deployed:
             return None
         try:
-            return eru_utils.eru_client.get_container(self.eru_container_id)
+            return g.docker_client.get_container(self.eru_container_id)
         except EruException as e:
             logging.exception(e)
             return {

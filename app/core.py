@@ -51,6 +51,7 @@ class RedisApp(Flask):
         self.config_node_max_mem = 2048 * 1000 * 1000
         self.stats_client = None
         self.alarm_client = None
+        self.docker_client = None
 
     def init_clients(self, config):
         init_logging(config)
@@ -62,8 +63,10 @@ class RedisApp(Flask):
         init_db(self)
         self.stats_client = self.init_stats_client(config)
         self.alarm_client = self.init_alarm_client(config)
+        self.docker_client = self.init_docker_client(config)
         logging.info('Stats enabled: %s', self.stats_enabled())
         logging.info('Alarm enabled: %s', self.alarm_enabled())
+        logging.info('Dockerizing Redis enabled: %s', self.docker_enabled())
 
     def register_blueprints(self):
         self.secret_key = os.urandom(24)
@@ -85,6 +88,7 @@ class RedisApp(Flask):
             g.user = self.get_user()
             g.lang = self.language()
             g.display_login_entry = self.display_login_entry()
+            g.docker_client = self.docker_client
 
     def get_user(self):
         return None
@@ -173,3 +177,10 @@ class RedisApp(Flask):
 
     def do_send_alarm(self, message, trace):
         self.alarm_client.send_alarm(message, trace)
+
+    def init_docker_client(self, config):
+        from thirdparty.eru_utils import DockerClient
+        return None if config.ERU_URL is None else DockerClient(config.ERU_URL)
+
+    def docker_enabled(self):
+        return self.docker_client is not None
