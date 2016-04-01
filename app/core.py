@@ -19,9 +19,9 @@ blueprints = (
 )
 
 
-def register_bp(app, module_name):
+def import_bp_string(module_name):
     import_name = '%s.bps.%s:bp' % (__package__, module_name)
-    app.register_blueprint(import_string(import_name))
+    return import_string(import_name)
 
 
 def init_logging(config):
@@ -70,9 +70,9 @@ class RedisApp(Flask):
         self.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
         for bp in blueprints:
-            register_bp(self, bp)
+            self.register_blueprint(import_bp_string(bp))
         if self.stats_enabled():
-            register_bp(self, 'statistics')
+            self.register_blueprint(import_bp_string('statistics'))
 
         for bp in self.ext_blueprints():
             self.register_blueprint(bp)
