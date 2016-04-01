@@ -47,7 +47,7 @@ $(document).ready(function() {
     </div>
     <div class='collapse navbar-collapse'>
         <ul class='nav navbar-nav navbar-right'>
-        {% if display_login_entry %}
+        {% if g.display_login_entry %}
             <li><a class='nav-link' href='{{ login_url() }}' data-localize='login'>Login</a></li>
         {% else %}
             <li><a class='nav-link' href='/nodes/manage/eru'><i class='fa fa-cube'></i> <span data-localize='container-nodes-mgr'>容器节点管理</span></a></li>
