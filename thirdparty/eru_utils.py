@@ -53,8 +53,7 @@ class DockerClient(Base):
             'name': i['sha'],
             'description': '',
             'creation': datetime_str_to_timestamp(i['created']),
-        } for i in self.client.list_app_versions(
-            what, offset, limit)['versions']]
+        } for i in self.client.list_app_versions(what, offset, limit)]
 
     @exception_adapt
     def list_redis_images(self, offset, limit):

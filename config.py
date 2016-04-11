@@ -63,6 +63,13 @@ IMAGES = {
     'cerberus': os.getenv('CERBERUS_IMAGE', 'hub.ricebook.net/service/cerberus:0.7.8'),
 }
 
+GRAPHITE = {
+    'write_host': os.getenv('GRAPHITE_WRITE_HOST', ''),
+    'write_port': int(os.getenv('GRAPHITE_WRITE_PORT', 2003)),
+    'query_host': os.getenv('GRAPHITE_QUERY_HOST', ''),
+    'query_port': int(os.getenv('GRAPHITE_QUERY_PORT', 8000)),
+}
+
 SKYEYE = {
     'host': os.getenv('SKYEYE_HOST', ''),
     'port': int(os.getenv('SKYEYE_PORT', 80)),

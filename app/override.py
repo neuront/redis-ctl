@@ -1,6 +1,4 @@
-import urlparse
-import urllib
-from flask import session, request, g, render_template
+from flask import session, request, g, render_template, url_for
 
 from core import RedisCtl, import_bp_string
 import models.user
@@ -16,7 +14,7 @@ class App(RedisCtl):
             return render_template('errors/%s.html' % e.code), e.code
 
     def login_url(self):
-        return flask.url_for('.login')
+        return url_for('.login')
 
     def ext_blueprints(self):
         return [import_bp_string('user')]
@@ -62,8 +60,12 @@ class App(RedisCtl):
         return (DockerClient(config) if config.ERU and config.ERU['URL']
                 else None)
 
+    def init_stats_client(self, config):
+        if (config.GRAPHITE and config.GRAPHITE.get('write_host') and
+                config.GRAPHITE.get('query_host')):
+            from thirdparty.graphite import Client
+            return Client(**config.GRAPHITE)
+        return None
+
     def init_alarm_client(self, config):
-        if config.SKYEYE and config.SKYEYE['host']:
-            from thirdparty.skyeye import SkyEyeClient
-            return SkyEyeClient(**config.SKYEYE)
         return None
