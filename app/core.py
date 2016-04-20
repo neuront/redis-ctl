@@ -33,7 +33,7 @@ def init_logging(config):
 
 
 class RedisApp(Flask):
-    def __init__(self):
+    def __init__(self, config):
         Flask.__init__(self, 'RedisMunin', static_url_path='/static')
 
         self.jinja_env.globals['render'] = render_template
@@ -53,7 +53,6 @@ class RedisApp(Flask):
         self.alarm_client = None
         self.container_client = None
 
-    def init_clients(self, config):
         init_logging(config)
         self.config['SQLALCHEMY_DATABASE_URI'] = config.SQLALCHEMY_DATABASE_URI
         self.config_node_max_mem = config.NODE_MAX_MEM

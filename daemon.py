@@ -20,8 +20,7 @@ def run(interval, app):
 
 
 def main():
-    app = config.App()
-    app.init_clients(config)
+    app = config.App(config)
     run(config.POLL_INTERVAL, app)
 
 if __name__ == '__main__':

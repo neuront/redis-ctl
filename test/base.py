@@ -5,32 +5,29 @@ import tempfile
 import unittest
 
 import config
+import daemonutils.cluster_task
+import daemonutils.auto_balance
+import models.base
+
 try:
     config.SQLALCHEMY_DATABASE_URI = config.TEST_SQLALCHEMY_DATABASE_URI
-    config.LOG_FILE = os.path.join(tempfile.gettempdir(), 'redisctlpytest')
-except ImportError:
+except AttributeError:
     raise ValueError('TEST_SQLALCHEMY_DATABASE_URI should be'
-                     ' specified in (override_)config for unittest')
+                     ' specified in override_config for unittest')
 
-
+config.LOG_FILE = os.path.join(tempfile.gettempdir(), 'redisctlpytest')
 config.PERMDIR = os.path.join(tempfile.gettempdir(), 'redisctlpytestpermdir')
 config.POLL_INTERVAL = 0
 config.ERU_URL = None
 config.ERU_NETWORK = 'net'
 config.ERU_GROUP = 'group'
+unittest.TestCase.maxDiff = None
+
 try:
     os.makedirs(config.PERMDIR)
 except OSError as exc:
     if exc.errno == errno.EEXIST and os.path.isdir(config.PERMDIR):
         pass
-
-import daemonutils.cluster_task
-import daemonutils.auto_balance
-import handlers.base
-import models.base
-
-app = handlers.base.app
-unittest.TestCase.maxDiff = None
 
 
 def reset_db():
@@ -42,7 +39,8 @@ def reset_db():
 class TestCase(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         unittest.TestCase.__init__(self, *args, **kwargs)
-        self.app = app
+        self.app = config.App(config)
+        self.app.register_blueprints()
         self.app.container_client = None
         self.db = models.base.db
 

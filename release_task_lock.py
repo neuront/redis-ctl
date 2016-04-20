@@ -1,10 +1,10 @@
-import handlers.base
+import config
 import models.base
 from models.task import TaskLock
 
 
 def main():
-    app = handlers.base.app
+    app = config.App(config)
     with app.app_context():
         for lock in models.base.db.session.query(TaskLock).all():
             if lock.step is not None:
