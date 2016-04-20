@@ -38,8 +38,7 @@ def cluster_panel(cluster_id):
         p.details = proxy_details.get('%s:%d' % (p.host, p.port), {})
     return render_template(
         'cluster/panel.html', cluster=c, nodes=nodes,
-        docker_client=bp.app.docker_client, plan_max_slaves=3,
-        stats_enabled=bp.app.stats_enabled())
+        plan_max_slaves=3, stats_enabled=bp.app.stats_enabled())
 
 
 @bp.route('/list')

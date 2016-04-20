@@ -17,6 +17,7 @@ config.PERMDIR = os.path.join(tempfile.gettempdir(), 'redisctlpytestpermdir')
 config.POLL_INTERVAL = 0
 config.ERU_URL = None
 config.ERU_NETWORK = 'net'
+config.ERU_GROUP = 'group'
 try:
     os.makedirs(config.PERMDIR)
 except OSError as exc:
@@ -42,7 +43,7 @@ class TestCase(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         unittest.TestCase.__init__(self, *args, **kwargs)
         self.app = app
-        self.app.docker_client = None
+        self.app.container_client = None
         self.db = models.base.db
 
     def setUp(self):
@@ -52,7 +53,7 @@ class TestCase(unittest.TestCase):
     def replace_eru_client(self, client=None):
         if client is None:
             client = FakeEruClientBase()
-        self.app.docker_client = client
+        self.app.container_client = client
         return client
 
     def run(self, result=None):
@@ -113,8 +114,8 @@ class FakeEruClientBase(object):
             'created': created,
         }
 
-    def deploy_node(self, pod, aof, netmode, cluster=True, host=None,
-                    port=6379):
+    def deploy_redis(self, pod, aof, netmode, cluster=True, host=None,
+                     port=6379):
         return self.deploy_with_network('redis', pod, netmode, host=host,
                                         args=[])
 

@@ -27,10 +27,10 @@ class RedisNode(Base):
     @cached_property
     def eru_info(self):
         from flask import g
-        if g.docker_client is None or not self.eru_deployed:
+        if g.container_client is None or not self.eru_deployed:
             return None
         try:
-            return g.docker_client.get_container(self.eru_container_id)
+            return g.container_client.get_container(self.eru_container_id)
         except EruException as e:
             logging.exception(e)
             return {

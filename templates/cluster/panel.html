@@ -407,11 +407,11 @@ $('#new-proxy-btn').click(function() {
 <div class="panel panel-primary">
   <div class="panel-heading panel-heading-hide-content" data-localize='set-auto-expansion'>设置自动扩容</div>
   <div>
-  {% if not docker_client %}
+  {% if not g.container_client %}
       <span data-localize='text-no-eru'>没有设定 Eru 地址</span>
   {% else %}
-      <span data-localize='text-eru-addr'>ERU 地址</span>: {{ docker_client.url|e }}
-      {%- set pods = docker_client.list_pods() %}
+      <span data-localize='text-eru-addr'>ERU 地址</span>: {{ g.container_client.url|e }}
+      {%- set pods = g.container_client.list_pods() %}
       {%- if pods|length == 0 %}
           <span data-localize='text-no-eru-pod'>Eru 没有可用的机房</span>
       {%- else %}

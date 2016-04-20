@@ -2,13 +2,13 @@ import logging
 from retrying import retry
 from eruhttp import EruClient, EruException
 
-import config
-
 
 class DockerClient(object):
-    def __init__(self, remote_url):
-        self.url = remote_url
-        self.client = EruClient(remote_url)
+    def __init__(self, config):
+        self.url = config.ERU_URL
+        self.client = EruClient(self.url)
+        self.group = config.ERU_GROUP
+        self.network = config.ERU_NETWORK
 
     @retry(stop_max_attempt_number=64, wait_fixed=500)
     def poll_task_for_container_id(self, task_id):
@@ -32,10 +32,10 @@ class DockerClient(object):
                             args=None):
         logging.info('Eru deploy %s to pod=%s entry=%s cores=%d host=%s :%s:',
                      what, pod, entrypoint, ncore, host, args)
-        network = self.client.get_network(config.ERU_NETWORK)
+        network = self.client.get_network(self.network)
         version_sha = self.lastest_version_sha(what)
         r = self.client.deploy_private(
-            config.ERU_GROUP, pod, what, ncore, 1, version_sha,
+            self.group, pod, what, ncore, 1, version_sha,
             entrypoint, 'prod', [network['id']], host_name=host, args=args)
         try:
             task_id = r['tasks'][0]
@@ -63,8 +63,11 @@ class DockerClient(object):
             'created': created,
         }
 
-    def deploy_node(self, pod, aof, netmode, cluster=True, host=None,
-                    port=6379):
+    def get_container(self, container_id):
+        return self.client.get_container(container_id)
+
+    def deploy_redis(self, pod, aof, netmode, cluster=True, host=None,
+                     port=6379):
         args = ['--port', str(port)]
         if aof:
             args.extend(['--appendonly', 'yes'])
@@ -91,3 +94,9 @@ class DockerClient(object):
     def revive_container(self, container_id):
         logging.debug('Revive container: %s', container_id)
         self.client.start_container(container_id)
+
+    def list_pods(self):
+        return self.client.list_pods()
+
+    def list_pod_hosts(self, pod):
+        return self.client.list_pod_hosts(pod)

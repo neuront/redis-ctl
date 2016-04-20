@@ -7,7 +7,7 @@ import models.audit
 
 
 def _deploy_node(pod, aof, host, app):
-    depl = app.docker_client.deploy_node(pod, aof, 'macvlan', host=host)
+    depl = app.container_client.deploy_redis(pod, aof, 'macvlan', host=host)
     cid = depl['container_id']
     h = depl['address']
     models.node.create_eru_instance(h, 6379, cid)
@@ -15,7 +15,7 @@ def _deploy_node(pod, aof, host, app):
 
 
 def _rm_containers(cids, app):
-    app.docker_client.rm_containers(cids)
+    app.container_client.rm_containers(cids)
     for c in cids:
         try:
             models.node.delete_eru_instance(c)

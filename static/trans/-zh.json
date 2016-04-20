@@ -16,5 +16,9 @@
 
     "audit-nodes": "节点事件",
 
+    "cont-no-pod-available": "没有可用的容器资源组",
+    "cont-no-pod-available-x": "可用的容器服务部署在",
+    "cont-no-pod-available-y": "但它没有给出可用的容器资源组; 请检查容器服务, 然后刷新此页面",
+
     "": ""
 }

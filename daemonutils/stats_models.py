@@ -114,7 +114,7 @@ class RedisNodeStatus(RedisStatsBase):
             logging.exception(e)
 
     def _check_capacity(self):
-        if (self.app.docker_client is None
+        if (self.app.container_client is None
                 or not self.details['cluster_enabled']
                 or not self.details['stat']
                 or len(self.details['slots']) == 0

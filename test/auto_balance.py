@@ -99,7 +99,7 @@ class AutoBalance(base.TestCase):
                 'aof': True,
                 'slaves': [],
             }), [2, 3, 5, 7], self.app)
-            self.assertTrue(1 in self.app.docker_client.deployed)
+            self.assertTrue(1 in self.app.container_client.deployed)
             self.assertDictEqual({
                 'what': 'redis',
                 'pod': 'std',
@@ -111,7 +111,7 @@ class AutoBalance(base.TestCase):
                 'ncores': 1,
                 'network': ['network:redis'],
                 'host_name': None,
-            }, self.app.docker_client.deployed[1])
+            }, self.app.container_client.deployed[1])
 
             tasks = models.task.undone_tasks()
             self.assertEqual(1, len(tasks))
@@ -160,7 +160,7 @@ class AutoBalance(base.TestCase):
                 'aof': True,
                 'slaves': [{}, {}],
             }), [2, 3, 5, 7, 11, 13, 17], self.app)
-            self.assertTrue(1 in self.app.docker_client.deployed)
+            self.assertTrue(1 in self.app.container_client.deployed)
             self.assertDictEqual({
                 'what': 'redis',
                 'pod': 'std',
@@ -172,13 +172,13 @@ class AutoBalance(base.TestCase):
                 'ncores': 1,
                 'network': ['network:redis'],
                 'host_name': None,
-            }, self.app.docker_client.deployed[1])
-            self.assertTrue(2 in self.app.docker_client.deployed)
-            self.assertEqual(self.app.docker_client.deployed[1],
-                             self.app.docker_client.deployed[2])
-            self.assertTrue(3 in self.app.docker_client.deployed)
-            self.assertEqual(self.app.docker_client.deployed[1],
-                             self.app.docker_client.deployed[3])
+            }, self.app.container_client.deployed[1])
+            self.assertTrue(2 in self.app.container_client.deployed)
+            self.assertEqual(self.app.container_client.deployed[1],
+                             self.app.container_client.deployed[2])
+            self.assertTrue(3 in self.app.container_client.deployed)
+            self.assertEqual(self.app.container_client.deployed[1],
+                             self.app.container_client.deployed[3])
 
             tasks = models.task.undone_tasks()
             self.assertEqual(1, len(tasks))
@@ -257,7 +257,7 @@ class AutoBalance(base.TestCase):
                 'host': '10.0.1.173',
                 'slaves': [{}, {'host': '10.0.1.174'}],
             }), [2, 3, 5, 7, 11, 13, 17, 19], self.app)
-            self.assertTrue(1 in self.app.docker_client.deployed)
+            self.assertTrue(1 in self.app.container_client.deployed)
             self.assertDictEqual({
                 'what': 'redis',
                 'pod': 'std',
@@ -269,8 +269,8 @@ class AutoBalance(base.TestCase):
                 'ncores': 1,
                 'network': ['network:redis'],
                 'host_name': '10.0.1.173',
-            }, self.app.docker_client.deployed[1])
-            self.assertTrue(2 in self.app.docker_client.deployed)
+            }, self.app.container_client.deployed[1])
+            self.assertTrue(2 in self.app.container_client.deployed)
             self.assertEqual({
                 'what': 'redis',
                 'pod': 'std',
@@ -282,8 +282,8 @@ class AutoBalance(base.TestCase):
                 'ncores': 1,
                 'network': ['network:redis'],
                 'host_name': None,
-            }, self.app.docker_client.deployed[2])
-            self.assertTrue(3 in self.app.docker_client.deployed)
+            }, self.app.container_client.deployed[2])
+            self.assertTrue(3 in self.app.container_client.deployed)
             self.assertEqual({
                 'what': 'redis',
                 'pod': 'std',
@@ -295,7 +295,7 @@ class AutoBalance(base.TestCase):
                 'ncores': 1,
                 'network': ['network:redis'],
                 'host_name': '10.0.1.174',
-            }, self.app.docker_client.deployed[3])
+            }, self.app.container_client.deployed[3])
 
             tasks = models.task.undone_tasks()
             self.assertEqual(1, len(tasks))
@@ -399,7 +399,7 @@ class AutoBalance(base.TestCase):
                     'slaves': [{}, {}],
                 }), [2, 3, 5, 7, 11, 13, 17], self.app)
 
-            self.assertEqual(0, len(self.app.docker_client.deployed))
+            self.assertEqual(0, len(self.app.container_client.deployed))
 
     def test_write_file_ipc(self):
         with self.app.test_client() as client:
