@@ -14,7 +14,7 @@ class App(RedisCtl):
             return render_template('errors/%s.html' % e.code), e.code
 
     def login_url(self):
-        return url_for('.login')
+        return url_for('user.login')
 
     def ext_blueprints(self):
         return [import_bp_string('user')]
@@ -38,7 +38,7 @@ class App(RedisCtl):
                                user=models.user.get_by_id(user_id))
 
     def access_ctl_user_valid(self):
-        return g.user is not None and g.user.active
+        return g.user is not None
 
     def access_ctl_user_adv(self):
         return g.user is not None and g.user.is_adv
