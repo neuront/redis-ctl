@@ -76,3 +76,41 @@ $(document).ready(function() {
         });
     });
 });
+
+function createAndLaunchCluster(descr, nodeList, callback) {
+    $.post('/cluster/add', {descr: descr}, function(r) {
+        $.ajax({
+            url: '/task/launch',
+            type: 'POST',
+            data: JSON.stringify({
+                nodes: nodeList,
+                cluster: r
+            }),
+            success: function() {
+                callback(null, r);
+            },
+            error: function(e) {
+                callback(e);
+            }
+        });
+    });
+}
+
+function replicateTask(masterHost, masterPort, slaveHost, slavePort, callback) {
+    $.ajax({
+        url: '/task/replicate',
+        type: 'POST',
+        data: {
+            master_host: masterHost,
+            master_port: masterPort,
+            slave_host: slaveHost,
+            slave_port: slavePort
+        },
+        success: function() {
+            callback(null);
+        },
+        error: function(e) {
+            callback(e);
+        }
+    });
+}

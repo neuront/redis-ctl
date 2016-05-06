@@ -9,10 +9,7 @@ window.TRANSLATIONS = {
     'enabled': 'Enabled',
     'disabled': 'Disabled',
 
-    '不正确的端口范围格式': 'invalid port format',
-    '正在注册': 'registering',
-
-    '尚未获取节点详细信息': 'WAITING FOR POLLING',
+    'waiting for polling': 'WAITING FOR POLLING',
     '此代理已被移除': 'Proxy removed',
     '正在载入集群信息': 'Loading cluster nodes',
     '节点不在集群中': 'Not in a cluster',

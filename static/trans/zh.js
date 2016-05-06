@@ -11,6 +11,10 @@ window.TRANSLATIONS = {
     'master': '主',
     'slave': '从',
 
+    'invalid port format': '不正确的端口范围格式',
+    'registering': '正在注册',
+    'waiting for polling': '尚未获取节点详细信息',
+
     'task_step_launch': '创建集群',
     'task_step_fix_migrate': '修复迁移状态',
     'task_step_migrate': '迁移槽位',

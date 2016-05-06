@@ -1,6 +1,6 @@
 {% extends './base.html' %}
 
-{% block title %}集群控制面板{% endblock %}
+{% block title %}{{ cluster.description|e }} - Cluster Panel{% endblock %}
 
 {% block head %}
 <script src='/static/js/cluster_task.js'></script>
@@ -20,46 +20,46 @@
 
 {% block body %}
 <div class="panel panel-primary">
-  <div class="panel-heading panel-heading-hide-content" data-localize='basic-settings'>基本设置</div>
+  <div class="panel-heading panel-heading-hide-content" data-localize='basic-settings'>Basic Settings</div>
   <table style='width: 100%' class='table'>
     <tr>
-      <td class='label-cell' data-localize='cluster-id'>集群 ID</td>
+      <td class='label-cell' data-localize='cluster-id'>Cluster ID</td>
       <td colspan='2'>{{ cluster.id }}</td>
     </tr>
     <tr>
-      <td class='label-cell' data-localize='cluster-description'>集群描述</td>
+      <td class='label-cell' data-localize='cluster-description'>Description</td>
       <td>
           <input id='cluster-descr-inp' class='form-control' value="{{ cluster.description|e }}">
       </td>
       <td>
-          <button class='btn btn-primary' id='cluster-set-descr' data-localize='cluster-set-descr'>改</button>
+          <button class='btn btn-primary' id='cluster-set-descr' data-localize='cluster-set-descr'>Update</button>
       </td>
     </tr>
     <tr>
-      <td class='label-cell' data-localize='cluster-creation'>Creation</td>
+      <td class='label-cell' data-localize='creation'>Creation</td>
       <td colspan='2'>{{ cluster.creation|strftime }}</td>
     </tr>
     <tr>
-      <td class='label-cell' data-localize='proxy-num'>代理数</td>
+      <td class='label-cell' data-localize='proxy-num'>Number of proxies</td>
       <td colspan='2'>{{ cluster.proxies|length }}</td>
     </tr>
     <tr>
-      <td class='label-cell' data-localize='nodes-num'>节点数</td>
+      <td class='label-cell' data-localize='nodes-num'>Number of Redis</td>
       <td colspan='2'>{{ cluster.nodes|length }}</td>
     </tr>
     <tr>
-      <td class='label-cell' data-localize='operating'>操作</td>
+      <td class='label-cell' data-localize='operating'>Ops</td>
       <td colspan='2'>
-        <button class='btn btn-primary' id='cluster-fix-migrating' data-localize='cluster-fix-migrating'>修复槽位迁移</button>
-        <button class='btn btn-primary' id='cluster-enable-all-nodes-alert' data-suppress='1' data-localize='cluster-enable-all-nodes-alert'>打开所有节点的报警</button>
-        <button class='btn btn-danger' id='cluster-suppress-all-nodes-alert' data-suppress='0' data-localize='cluster-suppress-all-nodes-alert'>关闭所有节点的报警</button>
+        <button class='btn btn-primary' id='cluster-fix-migrating' data-localize='cluster-fix-migrating'>Fix slots migration</button>
+        <button class='btn btn-primary' id='cluster-enable-all-nodes-alert' data-suppress='1' data-localize='cluster-enable-all-nodes-alert'>Enable all Redis alarm</button>
+        <button class='btn btn-danger' id='cluster-suppress-all-nodes-alert' data-suppress='0' data-localize='cluster-suppress-all-nodes-alert'>Disable all Redis alarm</button>
         <div style='margin: 1em'></div>
-        <button class='btn btn-info' id='cluster-enable-all-nodes-aof' data-aof='yes' data-localize='cluster-enable-all-nodes-aof'>打开所有节点的 AOF</button>
-        <button class='btn btn-danger' id='cluster-disable-all-nodes-aof' data-aof='no' data-localize='cluster-disable-all-nodes-aof'>关闭所有节点的 AOF</button>
+        <button class='btn btn-info' id='cluster-enable-all-nodes-aof' data-aof='yes' data-localize='cluster-enable-all-nodes-aof'>Enable all Redis AOF</button>
+        <button class='btn btn-danger' id='cluster-disable-all-nodes-aof' data-aof='no' data-localize='cluster-disable-all-nodes-aof'>Disable all Redis AOF</button>
 
       {% if cluster.nodes|length == 1 %}
         <div style='margin: 1em'></div>
-        <button class='btn btn-danger' id='shutdown-cluster' data-localize='shutdown-cluster'>重置最后一个节点并关闭集群</button>
+        <button class='btn btn-danger' id='shutdown-cluster' data-localize='shutdown-cluster'>Reset the last Redis &amp; shutdown cluster</button>
       {% endif %}
       </td>
     </tr>
@@ -174,16 +174,16 @@ $('#shutdown-cluster').click(function() {
 </script>
 
 <div class="panel panel-primary">
-    <div class="panel-heading panel-heading-hide-content" data-localize='nodes'>节点</div>
+    <div class="panel-heading panel-heading-hide-content" data-localize='nodes'>Redis</div>
     <table class='table'>
       <thead>
         <tr>
-          <th data-localize='node-id'>节点 ID</th>
-          <th data-localize='address'>地址</th>
-          <th data-localize='node-memory-usage'>内存</th>
-          <th data-localize='persistence'>持久化</th>
-          <th data-localize='role'>角色</th>
-          <th data-localize='slots-num'>槽位数量</th>
+          <th data-localize='node-id'>Node ID</th>
+          <th data-localize='address'>Address</th>
+          <th data-localize='node-memory-usage'>Memory Usage</th>
+          <th data-localize='persistence'>AOF</th>
+          <th data-localize='role'>Role</th>
+          <th data-localize='slots-num'>Slots</th>
         </tr>
       </thead>
       <tbody id='cluster-nodes' style='text-align: center'></tbody>
@@ -191,9 +191,9 @@ $('#shutdown-cluster').click(function() {
         <tr>
           <td>      
             <div class="row">
-                {{ button('集群自动发现', 4, offset=1, data={'toggle': 'modal', 'target': '#clusterAutoDiscover'}, lcl='btn-autodiscover') }}
-                {{ button('节点地址列表', 4, data={'toggle': 'modal', 'target': '#exportNodes'}, lcl='btn-list-nodes') }}
-                {{ button('节点调整', 3, data={'toggle': 'modal', 'target': '#nodesAdjustment'}, lcl='btn-bulk-migr') }}
+                {{ button('Auto discover', 4, offset=1, data={'toggle': 'modal', 'target': '#clusterAutoDiscover'}, lcl='btn-autodiscover') }}
+                {{ button('Nodes addresses', 4, data={'toggle': 'modal', 'target': '#exportNodes'}, lcl='btn-list-nodes') }}
+                {{ button('Batch migr', 3, data={'toggle': 'modal', 'target': '#nodesAdjustment'}, lcl='btn-bulk-migr') }}
             </div>
           </td>
         </tr>
@@ -234,7 +234,7 @@ $('#shutdown-cluster').click(function() {
             return [
                 $('<td>').append('-'),
                 $('<td>').append($('<a>').attr('href', ['/redis/panel', n.host, n.port].join('/')).text(n.host + ':' + n.port)),
-                $('<td>').attr('colspan', 4).text(_('尚未获取节点详细信息'))
+                $('<td>').attr('colspan', 4).text(_('waiting for polling'))
             ];
         }
 
@@ -332,7 +332,7 @@ $('#shutdown-cluster').click(function() {
         {%- if proxy.eru_deployed %}
           {{ button('下线此代理容器', size=2, color='danger', cls=['btn-del-container'], data={'type': 'proxy', 'cid': proxy.eru_container_id}, lcl='btn-stop-proxy-container') }}
           {%- if proxy.eru_info and not proxy.eru_info.is_alive %}
-            {{ button('复活', size=1, color='info', cls=['btn-revive-container'], data={'cid': proxy.eru_container_id}, lcl='btn-revive') }}
+            {{ button('Revive', size=1, color='info', cls=['btn-revive-container'], data={'cid': proxy.eru_container_id}, lcl='btn-revive') }}
           {%- endif %}
         {%- else %}
           {{ button('从监视面板移除', size=2, color='danger', cls=['delete-proxy-btn'], data={'host': proxy.host, 'port': proxy.port}, lcl='btn-remove') }}

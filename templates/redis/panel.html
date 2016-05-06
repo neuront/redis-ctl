@@ -3,7 +3,6 @@
 {% block title %}Node Panel - {{ node.host|e }}:{{ node.port }}{% endblock %}
 
 {% block head %}
-<script src='/static/js/eru_container.js'></script>
 <style>
 .table { text-align: center; }
 .status-table {
@@ -17,6 +16,8 @@
     padding: 6px 13px;
 }
 </style>
+<script src='/static/js/eru_container.js'></script>
+<script src='/static/js/cluster_task.js'></script>
 <script src='/static/js/redis_node.js'></script>
 <script src='/static/js/sort-nodes.js'></script>
 {% endblock %}
@@ -26,15 +27,15 @@
     <div class="panel-heading">{{ node.host|e }}:{{ node.port }}</div>
     <table class='table'>
     <tr>
-        <th data-localize='node-id'>节点 ID</th>
+        <th data-localize='node-id'>Node Id</th>
         <td>{{ detail.node_id|e }}</td>
     </tr>
     <tr>
-        <th data-localize='version'>版本</th>
+        <th data-localize='version'>Version</th>
         <td>{{ detail.version }}</td>
     </tr>
     <tr>
-        <th data-localize='node-memory-usage'>内存</th>
+        <th data-localize='node-memory-usage'>Memory</th>
         <td>
         {% if detail %}
             <span>
@@ -42,71 +43,71 @@
                 {% if detail.get('maxmemory', 0) != 0 %}
                   / {{ detail.maxmemory|filesizeformat }}
                 {% else %}
-                  (<span data-localize='max-memory-not-set'>未设置最大值</span>)
+                  (<span data-localize='max-memory-not-set'></span>)
                 {% endif %}
             </span>
-            <button class='btn btn-inverse' data-toggle='modal' data-target='#nodeMemSetting' data-localize='setting'>设置</button>
+            <button class='btn btn-inverse' data-toggle='modal' data-target='#nodeMemSetting' data-localize='settings'>Settings</button>
             {% autoescape false %}
                 {{ render('components/node/memory-setting.html', host=node.host, port=node.port,
                           max_mem=detail.maxmemory, used_mem=detail.used_memory, mem_limit=max_mem_limit) }}
             {% endautoescape %}
         {% else %}
-        <span data-localize='wait-poll'>等待轮询</span>
+        <span data-localize='wait-poll'>WAIT FOR POLLING</span>
         {% endif %}
         </td>
     </tr>
   {%- if node.eru_deployed %}
     <tr>
-        <th data-localize='deploy'>部署</th>
-        <td><i class='fa fa-cube'></i><span data-localize='eru-container'> ERU 容器</td>
+        <th data-localize='deploy'>Depoly</th>
+        <td><i class='fa fa-cube'></i><span data-localize='eru-container'> <span data-localize='container'>Container</span></td>
     </tr>
     {%- if node.eru_info %}
     <tr>
-        <td data-localize='eru-cantainer-id'>ERU 容器 ID</td>
+        <td><span data-localize='container'>Container</span> ID</td>
         <td>
             <span>{{ node.eru_container_id|e }}</span>
           {%- if not node.eru_info.is_alive %}
-            <button class='btn btn-info btn-revive-container' data-cid='{{ node.eru_container_id|e }}' data-localize='btn-revive'>复活此容器</button>
+            <button class='btn btn-info btn-revive-container' data-cid='{{ node.eru_container_id|e }}' data-localize='btn-revive'>Revive</button>
           {%- endif %}
         </td>
     </tr>
     <tr>
-        <td data-localize='create-container-time'>ERU 容器创建时间</td>
+        <td data-localize='creation'>Creation</td>
         <td>{{ node.eru_info.created|e }}</td>
     </tr>
     <tr>
-        <td data-localize='host-address'>ERU 宿主机地址</td>
+        <td data-localize='host-address'>Host Address</td>
         <td>{{ node.eru_info.host|e }}</td>
     </tr>
     {%- endif %}
   {%- endif %}
     <tr>
-        <th data-localize='statistics'>统计</th>
+        <th data-localize='statistics'>Stats</th>
         <td>
             {% if not (detail and detail.stat) %}
-            <span data-localize='wait-poll'>等待轮询采集数据</span>
+            <span data-localize='wait-poll'>WAIT FOR POLLING</span>
             {% else %}
             <table class='table status-table'>
                 <caption>CPU</caption>
                 <tr>
-                    <td data-localize='cpu-user'>用户态累计</td>
+                    <td data-localize='cpu-user'>CPU User</td>
                     <td>{{ detail.used_cpu_user }}</td>
                 </tr>
                 <tr>
-                    <td data-localize='cpu-sys'>内核态累计</td>
+                    <td data-localize='cpu-sys'>CPU Sys</td>
                     <td>{{ detail.used_cpu_sys }}</td>
                 </tr>
                 <tr>
-                    <td data-localize='uptime'>总运行时间</td>
+                    <td data-localize='uptime'>Uptime</td>
                     <td>{{ detail.uptime_in_seconds }}</td>
                 </tr>
                 <tr>
-                    <td data-localize='avg-cpu-usage'>平均 CPU 占用率</td>
+                    <td data-localize='avg-cpu-usage'>Avg CPU usage</td>
                     <td>{{ ((detail.used_cpu_user + detail.used_cpu_sys) / detail.uptime_in_seconds * 100)|round(2) }}%</td>
                 </tr>
             </table>
             <table class='table status-table'>
-                <caption data-localize='storage'>存储</caption>
+                <caption data-localize='storage'>Storage</caption>
                 <tr>
                     <td>Keyspace hits</td>
                     <td>{{ detail.keyspace_hits }}</td>
@@ -125,13 +126,13 @@
                 </tr>
             </table>
             <table class='table status-table'>
-                <caption data-localize="node-memory-usage">内存</caption>
+                <caption data-localize="node-memory-usage">Memory</caption>
                 <tr>
-                    <td data-localize='used-memory'>已使用内存</td>
+                    <td data-localize='used-memory'>Used memory</td>
                     <td>{{ detail.get('used_memory', 0)|filesizeformat }}</td>
                 </tr>
                 <tr>
-                    <td data-localize='mem-rss'>常驻集</td>
+                    <td data-localize='mem-rss'>RSS</td>
                     <td>{{ detail.get('used_memory_rss', 0)|filesizeformat }}</td>
                 </tr>
             </table>
@@ -477,9 +478,9 @@ $('#quit-cluster-btn,#migrating-slots-btn').click(function() {
 {% else %}
 
 <div style='margin-bottom: 1em' class='row'>
-    {{ button('集群自动发现', size=2, data={'toggle': 'modal', 'target': '#clusterAutoDiscover'}, lcl='btn-autodiscover') }}
-    {{ button('启动集群', size=2, id='start-cluster-btn', cls=['panel-btn'], data={'bind': 'start-cluster'}, lcl='start-cluster') }}
-    {{ button('加入集群', size=2, id='join-cluster-btn', cls=['panel-btn'], data={'bind': 'join-cluster'}, lcl='join-cluster') }}
+    {{ button('Auto discover', size=2, data={'toggle': 'modal', 'target': '#clusterAutoDiscover'}, lcl='btn-autodiscover') }}
+    {{ button('Launch cluster', size=2, id='start-cluster-btn', cls=['panel-btn'], data={'bind': 'start-cluster'}, lcl='start-cluster') }}
+    {{ button('Join cluster', size=2, id='join-cluster-btn', cls=['panel-btn'], data={'bind': 'join-cluster'}, lcl='join-cluster') }}
 </div>
 
 {% autoescape false %}
@@ -487,8 +488,8 @@ $('#quit-cluster-btn,#migrating-slots-btn').click(function() {
 {% endautoescape %}
 
 <div class='panel-div' id='start-cluster'>
-    <span data-localize='cluster-description'>集群描述</span>: <input id='start-cluster-descr'>
-    <button class='btn btn-primary' id='start-cluster-confirm' data-localize='start-cluster'>启动</button>
+    <span data-localize='cluster-description'>Cluster description</span>: <input id='start-cluster-descr'>
+    <button class='btn btn-primary' id='start-cluster-confirm' data-localize='start-cluster'>Launch</button>
 </div>
 
 <div class='panel-div' id='join-cluster'>
@@ -517,28 +518,17 @@ $('#start-cluster-confirm').click(function() {
         return $('#start-cluster-descr').focus();
     }
     var btn = $(this);
-    btn.text('请稍候').attr('disabled', 'disabled');
-    $.post('/cluster/add', {
-        descr: $('#start-cluster-descr').val()
-    }, function(r) {
-        $.ajax({
-            url: '/task/launch',
-            type: 'POST',
-            data: JSON.stringify({
-                nodes: [{
-                    host: {{ node.host|tojson }},
-                    port: {{ node.port|tojson }},
-                }],
-                cluster: r
-            }),
-            success: function() {
-                window.location.reload();
-            },
-            error: function(r) {
-                btn.parent().text(_('failed') + ': ' + r.responseText);
-            }
-        });
-    });
+    btn.attr('disabled', 'disabled');
+    createAndLaunchCluster($('#start-cluster-descr').val(), [{
+        host: {{ node.host|tojson }},
+        port: {{ node.port|tojson }},
+    }], function(e, r) {
+        if (e) {
+            console.error(e);
+            return alert(_('failed') + ': ' + e.responseText);
+        }
+        window.location = '/cluster/panel/' + r;
+    })
 });
 
 $('#join-cluster-btn').click(function() {
@@ -580,7 +570,7 @@ $('#join-cluster-btn').click(function() {
                             }
                         },
                         error: function(r) {
-                            console.log(r);
+                            console.error(r);
                             alert(_('failed') + ': ' + r.responseText);
                         }
                     });
@@ -632,20 +622,12 @@ $('#replicate-confirm').click(function() {
     $('#join-cluster button').attr('disabled', 'disabled');
     var btn = $(this);
     btn.text('请稍候');
-    $.ajax({
-        url: '/task/replicate',
-        type: 'POST',
-        data: {
-            master_host: opt.host,
-            master_port: opt.port,
-            slave_host: {{ node.host|tojson }},
-            slave_port: {{ node.port|tojson }}
-        },
-        success: function() {
+    replicateTask(opt.host, opt.port, {{ node.host|tojson }}, {{ node.port|tojson }}, function(e) {
+        if (e) {
+            console.error(e);
+            btn.parent().text(_('failed') + ': ' + e.responseText);
+        } else {
             window.location.reload();
-        },
-        error: function(r) {
-            btn.parent().text(_('failed') + ': ' + r.responseText);
         }
     });
 });
