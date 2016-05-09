@@ -33,30 +33,11 @@
     "expnd-reverse": "Sort desc",
     "commit-auto-discover": "Register these nodes and add them into a cluster",
 
-    "proxies": "Proxies",
-    "read-only": "Read only",
-    "btn-direct-command": "Send cmd",
-    "btn-sync-slots-map": "Sync remote",
-    "reg-cluster-proxy": "Register proxy",
-    "set-auto-expansion": "Auto expansion",
-    "text-no-eru": "Eru not set",
-    "text-eru-addr": "Eru set to",
-    "text-no-eru-pod": "No pod in Eru",
-    "text-auto-expand": "Auto migrating when any Redis memory loads over 90%",
-    "btn-enable-auto-expand": "Enable",
-    "background-task": "Tasks",
-    "more-task": "More",
-
-    "btn-stop-proxy-container": "Stop container",
-    "btn-remove": "Remove",
-    "btn-disable-alarm": "Disable alarm",
-
     "home": "First page",
     "previous-page": "Previous page",
     "back-to-cluster-panel": "Back to cluster panel",
     "next-page": "Next page",
 
-    "host-address": "Host address",
     "save": "Save",
     "history": "History",
     "belonging-cluster": "In the cluster",
@@ -109,12 +90,6 @@
     "event-type-1": "Remove",
     "event-type-2": "Config",
     "event-type-3": "Command",
-
-    "container-id": "Container ID",
-    "mirrored-version": "Mirrored version",
-    "create-time": "Create time",
-    "cluster-mode": "Cluster mode",
-    "offline-container": "Offline container",
 
     "current-slots-num": "Current slots",
     "adjusted-slots-num": "Slots after migrated",

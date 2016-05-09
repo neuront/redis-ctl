@@ -2,6 +2,18 @@
     "master": "主",
     "slave": "从",
     "cluster": "集群",
+    "proxy": "代理",
+    "ops": "操作",
+    "read-only": "只读",
+
+    "first-page": "首页",
+    "previous-page": "上一页",
+    "next-page": "下一页",
+    "btn-disable-alarm": "关闭报警",
+    "register": "注册",
+    "btn-remove": "移除",
+    "btn-remove-container": "下线此容器",
+    "view-more": "查看更多",
 
     "register-node": "注册新节点",
     "register-node-host": "节点地址",
@@ -20,6 +32,10 @@
     "btn-revive": "复活此容器",
     "creation": "创建时间",
     "statistics": "统计",
+    "image-version": "镜像版本",
+    "container-id": "容器 ID",
+    "cluster-mode": "集群模式",
+    "offline": "下线",
 
     "node-memory-usage": "内存",
     "max-memory-not-set": "最大值未设置",
@@ -66,6 +82,17 @@
     "node-id": "节点 ID",
     "role": "角色",
     "slots-num": "槽位数量",
+    "btn-direct-command": "发送指令",
+    "btn-sync-slots-map": "同步槽位",
+    "reg-cluster-proxy": "注册新集群代理",
+    "set-auto-expansion": "设置自动扩容",
+
+    "text-no-container-client": "没有设定容器化客户端",
+    "text-container-client": "容器化客户端",
+    "text-no-pod": "没有可用的资源组",
+    "text-auto-expand": "集群自动扩容在集群节点内存容量使用超过 90% 时自动申请新节点并迁移数据.",
+    "btn-enable-auto-expand": "启用自动扩容",
+    "background-task": "后台任务",
 
     "join-cluster": "加入集群",
 
@@ -82,6 +109,7 @@
     "task-type-4": "移除节点",
     "task-type-5": "自动扩容",
     "task-type-6": "批量操作",
+    "back-to-cluster-panel": "回到集群面板",
 
     "event-type-0": "添加",
     "event-type-1": "移除",

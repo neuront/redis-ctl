@@ -149,16 +149,16 @@
         </div>
         {% endif %}
 
-        {{ checkbox('关闭报警', size=2, color='danger', cls=['check-suppress-alert'], checked=node.suppress_alert, data={'ntype': 'redis', 'host': node.host, 'port': node.port}, lcl='btn-disable-alarm') }}
+        {{ checkbox('Disable alarm', size=2, color='danger', cls=['check-suppress-alert'], checked=node.suppress_alert, data={'ntype': 'redis', 'host': node.host, 'port': node.port}, lcl='btn-disable-alarm') }}
 
         {%- if node.assignee is none and not node.eru_deployed %}
-            {{ button('从监视器中移除此节点', size=2, color='danger', cls=['node-deleter'], data={'host': node.host, 'port': node.port}, lcl='btn-remove') }}
+            {{ button('Unregister', size=2, color='danger', cls=['node-deleter'], data={'host': node.host, 'port': node.port}, lcl='btn-remove') }}
         {% endif %}
 
         {%- if detail.slots_migrating %}
-            {{ button('修复迁移状态', size=2, color='warning', cls=['fix-migrating-btn'], data={'host': node.host, 'port': node.port}, lcl='cluster-fix-migrating') }}
+            {{ button('Fix migrating', size=2, color='warning', cls=['fix-migrating-btn'], data={'host': node.host, 'port': node.port}, lcl='cluster-fix-migrating') }}
         {% endif %}
-        {{ button('发送指令', size=1, data={'toggle': 'modal', 'target': '#commandConsole', 'host': node.host, 'port': node.port}, lcl='btn-direct-command') }}
+        {{ button('Send Cmd', size=1, data={'toggle': 'modal', 'target': '#commandConsole', 'host': node.host, 'port': node.port}, lcl='btn-direct-command') }}
         {{ button('INFO', size=1, cls=['info-btn'], data={'type': 'node', 'host': node.host, 'port': node.port}) }}
         {{ button('CLUSTER NODES', size=2, cls=['cluster-nodes-btn'], data={'host': node.host, 'port': node.port}) }}
     </div>
