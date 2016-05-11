@@ -31,8 +31,6 @@ window.TRANSLATIONS = {
     'processing': 'Processing',
     'completed': 'Done',
 
-    '节点已被移除': 'Removed',
-    '当前节点': 'Myself',
     'im_slave': 'This is a slave',
 
     '确定要下线此容器吗?': 'This container will be removed, are you sure?',

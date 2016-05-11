@@ -47,6 +47,7 @@ window.TRANSLATIONS = {
     'processing': '正在执行',
     'completed': '完成',
 
+    'Myself': '当前节点',
     'im_slave': '此节点是从节点',
 
     'Insufficient resource in specified host': '指定机器的资源不足',

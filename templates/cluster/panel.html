@@ -188,18 +188,15 @@ $('#shutdown-cluster').click(function() {
         </tr>
       </thead>
       <tbody id='cluster-nodes' style='text-align: center'></tbody>
-      <tfoot>
-        <tr>
-          <td>      
-            <div class="row">
-                {{ button('Auto discover', 4, offset=1, data={'toggle': 'modal', 'target': '#clusterAutoDiscover'}, lcl='btn-autodiscover') }}
-                {{ button('Nodes addresses', 4, data={'toggle': 'modal', 'target': '#exportNodes'}, lcl='btn-list-nodes') }}
-                {{ button('Batch migr', 3, data={'toggle': 'modal', 'target': '#nodesAdjustment'}, lcl='btn-bulk-migr') }}
-            </div>
-          </td>
-        </tr>
-      </tfoot>
     </table>
+    <form class='form-horizontal'>
+        <div class='form-group'>
+            {{ button('Auto discover', 3, cls=['btn-block'], data={'toggle': 'modal', 'target': '#clusterAutoDiscover'}, lcl='btn-autodiscover') }}
+            {{ button('Nodes addresses', 3, cls=['btn-block'], data={'toggle': 'modal', 'target': '#exportNodes'}, lcl='btn-list-nodes') }}
+            {{ button('Batch migr', 3, cls=['btn-block'], data={'toggle': 'modal', 'target': '#nodesAdjustment'}, lcl='btn-bulk-migr') }}
+            {{ button('Batch add', 3, cls=['btn-block'], data={'toggle': 'modal', 'target': '#nodesAdd'}, lcl='btn-batch-add') }}
+        </div>
+    </form>
 </div>
 
 <script>
@@ -302,6 +299,7 @@ $('#shutdown-cluster').click(function() {
 {% autoescape false %}
     {{ render('components/cluster/export-nodes.html') }}
     {{ render('components/cluster/nodes-adjustment.html', cluster_id=cluster.id) }}
+    {{ render('components/cluster/nodes-add.html', cluster_id=cluster.id) }}
 {% endautoescape %}
 
 <div class="panel panel-primary">

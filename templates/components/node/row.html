@@ -27,16 +27,16 @@
         {% else %}
             {% if node.stat %}
                 {% if cluster is none %}
-                <span class='label label-success' data-localize='ready'>就绪</span>
+                <span class='label label-success' data-localize='ready'>Ready</span>
                 {% else %}
-                <span class='label label-primary' data-localize='serving'>在役</span>
+                <span class='label label-primary' data-localize='serving'>Serving</span>
                 |
                 <a href='#cluster-{{ cluster.id }}'>#{{ cluster.id }}</a>
                 |
                   {% if node.detail.slave %}
-                  <span data-localize='slave'>从</span>
+                  <span data-localize='slave'>Slave</span>
                   {% else %}
-                  <span data-localize='master'>主</span>
+                  <span data-localize='master'>Master</span>
                   {% endif %}
                 {% endif %}
             {% else %}
@@ -44,13 +44,13 @@
             {% endif %}
 
             {% if node.detail.slots_migrating %}
-            <span class='label label-warning' data-localize='migrating'>有槽位正在迁移</span>
+            <span class='label label-warning' data-localize='migrating'>Migrating</span>
             {% endif %}
         {% endif %}
     </td>
     <td>
         {% if stats_enabled %}
-        <a target='_blank' href='/stats/redis?host={{ node.host|e }}&port={{ node.port }}' class='btn'><span data-localize='history'>状态历史</span> {{ icon('line-chart') }}</a>
+        <a target='_blank' href='/stats/redis?host={{ node.host|e }}&port={{ node.port }}' class='btn'><span data-localize='history'>History</span> {{ icon('line-chart') }}</a>
         {% endif %}
         <button class='check-suppress-alert check-group check-group-danger {{ 'check-group-checked' if node.suppress_alert else '' }}' data-ntype='redis' data-host={{ node.host|tojson }} data-port='{{ node.port|tojson }}' data-localize='btn-disable-alarm'>
         Disable alarm

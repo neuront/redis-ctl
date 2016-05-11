@@ -5,15 +5,20 @@
     "proxy": "代理",
     "ops": "操作",
     "read-only": "只读",
+    "or": "或",
 
     "first-page": "首页",
     "previous-page": "上一页",
     "next-page": "下一页",
+    "ready": "就绪",
+    "serving": "在役",
     "btn-disable-alarm": "关闭报警",
     "register": "注册",
     "btn-remove": "移除",
     "btn-remove-container": "下线此容器",
     "view-more": "查看更多",
+    "history": "状态历史",
+    "migrating": "有槽位正在迁移",
 
     "register-node": "注册新节点",
     "register-node-host": "节点地址",
@@ -48,6 +53,22 @@
     "storage": "存储",
     "used-memory": "已使用内存",
     "mem-rss": "常驻集",
+    "serving-in-cluster": "所属集群",
+    "loading-cluster-list": "正在加载集群列表",
+    "quit-cluster": "退出集群",
+    "migr-out-slot": "迁出槽位",
+    "already-quit-message": "此节点已由其它进程控制退出集群, 点此按钮解除其与集群的关联",
+    "loading-cluster-info": "正在加载集群信息",
+    "quit-cluster-precondition": "退出集群 - 迁出该节点上的所有槽位才能退出",
+    "migrate-in": "迁出至此节点的槽位数",
+    "after-migrated": "迁移后的槽位数",
+    "confirm": "确定",
+    "slots-remain-err": "退出集群前节点槽位必须完全迁出",
+    "insufficient-slots": "槽位不足",
+    "select-cluster": "选择集群",
+    "join-cluster-confirm": "加入成为主节点",
+    "select-master": "选择主节点",
+    "replicate-confirm": "以此主节点的副本加入",
 
     "container-nodes-mgr": "容器节点管理",
     "global-cluster-tasks-list": "集群任务",
@@ -59,6 +80,7 @@
     "opt-noalert-only": "忽略报警节点",
     "opt-migrating-only": "显示槽位正在迁移的节点",
 
+    "no-proxy": "没有代理",
     "masters-number": "主节点个数",
     "slaves-number": "从节点个数",
 
@@ -86,6 +108,7 @@
     "btn-sync-slots-map": "同步槽位",
     "reg-cluster-proxy": "注册新集群代理",
     "set-auto-expansion": "设置自动扩容",
+    "btn-equalize": "平均分配迁出的槽位",
 
     "text-no-container-client": "没有设定容器化客户端",
     "text-container-client": "容器化客户端",
@@ -94,6 +117,7 @@
     "btn-enable-auto-expand": "启用自动扩容",
     "background-task": "后台任务",
 
+    "start-cluster": "启动集群",
     "join-cluster": "加入集群",
 
     "time": "时间",
