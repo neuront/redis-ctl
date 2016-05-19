@@ -44,6 +44,11 @@ ERU = {
     'NETWORK': os.getenv('ERU_NETWORK', 'net'),
 }
 
+SKYEYE = {
+    'host': os.getenv('SKYEYE_HOST', ''),
+    'port': int(os.getenv('SKYEYE_PORT', 80)),
+}
+
 try:
     from override_config import *
 except ImportError:

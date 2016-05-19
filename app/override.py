@@ -66,3 +66,9 @@ class App(RedisCtl):
         from thirdparty.eru_utils import DockerClient
         return (DockerClient(config) if config.ERU and config.ERU['URL']
                 else None)
+
+    def init_alarm_client(self, config):
+        if config.SKYEYE and config.SKYEYE['host']:
+            from thirdparty.skyeye import SkyEyeClient
+            return SkyEyeClient(**config.SKYEYE)
+        return None
