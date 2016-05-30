@@ -14,7 +14,8 @@ def exception_adapt(f):
         try:
             return f(*args, **kwargs)
         except EruException as e:
-            raise ContainerizeExceptionBase(e)
+            logging.exception(e)
+            raise ContainerizeExceptionBase(e.message)
     return g
 
 
@@ -30,6 +31,9 @@ class DockerClient(Base):
 
     def cpu_slice(self):
         return 10
+
+    def cpu_slice_factor(self):
+        return 0.1
 
     @retry(stop_max_attempt_number=64, wait_fixed=500)
     def poll_task_for_container_id(self, task_id):
@@ -51,6 +55,7 @@ class DockerClient(Base):
         } for i in self.client.list_app_versions(
             what, offset, limit)['versions']]
 
+    @exception_adapt
     def list_redis_images(self, offset, limit):
         return self._list_images('redis', offset, limit)
 
