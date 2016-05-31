@@ -47,6 +47,7 @@ ERU = {
 SKYEYE = {
     'host': os.getenv('SKYEYE_HOST', ''),
     'port': int(os.getenv('SKYEYE_PORT', 80)),
+    'cooldown': int(os.getenv('SKYEYE_COOLDOWN', 900)),
 }
 
 try:
