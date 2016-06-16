@@ -13,7 +13,8 @@ class SkyEyeClient(Timed):
         return 'SkyEye <%s>' % self.url
 
     def do_send_alarm(self, endpoint, message, exception, **kwargs):
-        logging.debug('==============> %s:%d', endpoint.host, endpoint.port)
+        logging.error('Send alarm for %s:%d because %s',
+                      endpoint.host, endpoint.port, message)
         try:
             requests.post(self.url, json.dumps([{
                 'source': 'redisctl',
